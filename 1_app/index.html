@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
 <!-- Clumsy Space r10 gizmo drag --><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Clumsy Space</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -354,7 +355,6 @@ body[data-mode=magnet] #stepsX button,body[data-mode=pin] #stepsX button{padding
 .dkHead b{flex:1;font-size:calc(12.5px*var(--fs,1))}.dkBtns{display:flex;gap:4px}.dkBtns .dkX{padding:3px;min-height:0;width:26px;height:26px}.dkBtns .dkX svg.px{width:16px;height:16px}
 .rsz{position:absolute;z-index:3;touch-action:none}.rsz-e{right:0;top:12px;bottom:12px;width:7px;cursor:ew-resize}.rsz-w{left:0;top:12px;bottom:12px;width:7px;cursor:ew-resize}.rsz-s{left:12px;right:12px;bottom:0;height:7px;cursor:ns-resize}.rsz-se{right:0;bottom:0;width:14px;height:14px;cursor:nwse-resize}.rsz-sw{left:0;bottom:0;width:14px;height:14px;cursor:nesw-resize}.dkDocked .rsz{display:none}.dkBtns .btn{width:auto;margin:0;padding:3px 8px}
 .dkBody{padding:10px;overflow-y:auto}.dkBody .sec{border-top:0;padding-top:0}.dkBody .sec>h3,.dkBody .dkPop{display:none}
-.nxt .nxH{font-weight:700}.nxt .nxS{color:var(--ink2);font-size:calc(12px*var(--fs,1));margin-top:-4px}.nxt .btn{flex-direction:column;align-items:flex-start;text-align:left;gap:2px}.nxt .btn small{display:block;font-weight:400;opacity:.8;font-size:.85em}
 .sec{position:relative}.dkPop{position:absolute;right:0;top:12px;width:24px;height:24px;border:0;border-radius:7px;background:transparent;cursor:pointer;padding:2px;opacity:.6}
 .dkPop:hover{opacity:1;background:var(--panel2)}.dkPop svg.px{width:16px;height:16px;fill:var(--lime)}
 .sec:first-of-type>.dkPop{top:0}.dkHole{display:flex;gap:8px;align-items:center;justify-content:space-between}
@@ -689,10 +689,18 @@ header .hdr-act{margin-left:auto}
 #roach.warnC .rb{border-color:var(--warn)}#roach.warnC .rbh{color:var(--warn)}
 #roach.note .rt,#roach.warnC .rt{display:none}
 /* Khoét khớp: hộp hỏi trước khi cắt */
-.ksOv{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px}
-.ksBox{background:var(--panel);color:var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:16px;max-width:400px;display:flex;flex-direction:column;gap:12px}
-.ksBox p{margin:0;line-height:1.5}
-.ksBox .ksBt{display:flex;gap:8px;flex-wrap:wrap}
+.ksOv,.dlOv{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px}
+.ksBox,.dlBox{background:var(--panel);color:var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:16px;max-width:400px;width:100%;box-sizing:border-box;max-height:88vh;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.ksBox p,.dlBox p{margin:0;line-height:1.5}
+.ksBox .ksBt,.dlBox .ksBt{display:flex;gap:8px;flex-wrap:wrap}
+.dlBox h3{margin:0;font-size:calc(15px*var(--fs,1))}
+.dlOpt{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:10px;cursor:pointer}
+.dlOpt:hover{background:var(--panel2)}
+.dlOpt input{margin-top:3px;accent-color:var(--accent);flex:none}
+.dlOpt b{font-weight:600}
+.dlSub{display:block;color:var(--ink2);font-size:calc(11.5px*var(--fs,1))}
+.dlFmt{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 8px}
+.dlFmtLb{color:var(--ink2);font-size:calc(12px*var(--fs,1))}
 </style>
 
 <div id="home">
@@ -858,18 +866,26 @@ header .hdr-act{margin-left:auto}
           </div>
         </div>
         <div class="sec hide" id="scale3box"><div id="scale3"></div></div>
-        <button class="btn pri" id="to4">Sang Lưu file</button>
+        <button class="btn pri" id="to4">Sang Hoàn tất</button>
       </section>
       <!-- BƯỚC 4 -->
       <section class="step" id="s4">
-        <div><h3>Bước 4</h3><h2>Lưu file</h2></div>
+        <div><h3>Bước 4</h3><h2>Hoàn tất</h2></div>
         <div class="sec" id="scale4box"><div id="scale4"></div></div>
+        <div class="sec">
+          <h3>Xếp lên bàn in</h3>
+          <label class="fld"><span class="top">Cạnh bàn in (mm)</span><input type="number" id="bedMM" min="50" max="1000" value="256"></label>
+          <label class="fld"><span class="top">Khoảng cách giữa các mảnh (mm)</span><input type="number" id="gapMM" min="0" max="50" value="6"></label>
+          <label class="chk"><input type="checkbox" id="layFlat" checked>Tự lật mỗi mảnh nằm phẳng</label>
+          <label class="chk"><input type="checkbox" id="autoClose" checked>Tự đóng các lỗ hở (mảnh xuất ra là khối kín)</label>
+          <button class="btn pri" id="btnLayout">Xếp bộ phận</button>
+          <p class="note" id="layNote"></p>
+        </div>
         <div class="sec">
           <h3>Xuất file</h3>
           <button class="btn pri" id="btnExport" disabled>Tải zip các mảnh (STL)</button>
-          <p class="note">App tự lật phẳng, đóng lỗ hở và xếp các mảnh lên bàn khi xuất. Zip có từng mảnh STL riêng và một file bàn in gộp, trục Z hướng lên.</p>
+          <p class="note">File zip có từng mảnh STL riêng và một file bàn in gộp tất cả, trục Z hướng lên.</p>
         </div>
-        <div class="sec nxt" data-nxt="joint"></div>
         <div class="sec"><h3>Bộ phận</h3><div class="list" id="pList4"></div></div>
       </section>
 
@@ -1007,7 +1023,6 @@ header .hdr-act{margin-left:auto}
           <button class="btn pri" id="ckExport">Tải zip</button>
           <p class="note">Zip có đầu, thân, switch mẫu và một file bàn in gộp, trục Z hướng lên.</p>
         </div>
-        <div class="sec nxt" data-nxt="clicker"></div>
       </section>
 
       <!-- SPIN XOAY -->
@@ -1095,7 +1110,6 @@ header .hdr-act{margin-left:auto}
           <p class="note" id="mxNote"></p>
           <div class="mspWarn" id="mxWarn">Lưu ý cực nam châm: các nam châm ghép đôi phải đặt ngược cực nhau ở hai mảnh. Kiểm tra cực trước khi dán, nếu không hai mảnh sẽ đẩy nhau.</div>
         </div>
-        <div class="sec nxt" data-nxt="mspin"></div>
       </section>
     </aside>
     <div id="stage">
@@ -1248,17 +1262,9 @@ function toast(msg, err = false) {
 }
 async function busy(msg, fn) {
   $('#busyMsg').textContent = msg; $('#busy').classList.add('on'); await nextFrame();
-  const t0 = performance.now();
-  const busyTimer = setInterval(() => {
-    const el = $('#busyMsg'); if (!el) return;
-    const s = Math.round((performance.now() - t0) / 1000);
-    if (s < 2) return;
-    const base = el.textContent.replace(/\s*\(\d+s\)$/, '');
-    el.textContent = base + ` (${s}s)`;
-  }, 1000);
   try { return await fn(); }
   catch (e) { console.error('[TK]', e); toast('Có lỗi: ' + (e && e.message || e), true); }
-  finally { clearInterval(busyTimer); $('#busy').classList.remove('on'); }
+  finally { $('#busy').classList.remove('on'); }
 }
 const svgEye = '<svg class="px" viewBox="0 0 20 20" shape-rendering="crispEdges"><path d="M7 3h6v1h-6zM5 4h10v1h-10zM4 5h5v1h-5zM11 5h5v1h-5zM3 6h3v1h-3zM9 6h2v1h-2zM14 6h3v1h-3zM2 7h3v1h-3zM7 7h6v1h-6zM15 7h3v1h-3zM1 8h3v1h-3zM7 8h6v1h-6zM16 8h3v1h-3zM1 9h2v1h-2zM6 9h3v1h-3zM11 9h3v1h-3zM17 9h2v1h-2zM1 10h2v1h-2zM6 10h3v1h-3zM11 10h3v1h-3zM17 10h2v1h-2zM1 11h3v1h-3zM7 11h6v1h-6zM16 11h3v1h-3zM2 12h3v1h-3zM7 12h6v1h-6zM15 12h3v1h-3zM3 13h3v1h-3zM9 13h2v1h-2zM14 13h3v1h-3zM4 14h5v1h-5zM11 14h5v1h-5zM5 15h10v1h-10zM7 16h6v1h-6z"/></svg>';
 const svgEyeOff = '<svg class="px" viewBox="0 0 20 20" shape-rendering="crispEdges"><path d="M2 1h1v1h-1zM1 2h3v1h-3zM2 3h3v1h-3zM8 3h5v1h-5zM3 4h3v1h-3zM7 4h8v1h-8zM4 5h3v1h-3zM11 5h5v1h-5zM3 6h5v1h-5zM14 6h3v1h-3zM2 7h3v1h-3zM6 7h3v1h-3zM15 7h3v1h-3zM1 8h3v1h-3zM7 8h3v1h-3zM16 8h3v1h-3zM1 9h2v1h-2zM8 9h3v1h-3zM17 9h2v1h-2zM1 10h2v1h-2zM9 10h3v1h-3zM17 10h2v1h-2zM1 11h3v1h-3zM10 11h3v1h-3zM16 11h3v1h-3zM2 12h3v1h-3zM11 12h3v1h-3zM15 12h3v1h-3zM3 13h3v1h-3zM12 13h5v1h-5zM4 14h5v1h-5zM12 14h4v1h-4zM5 15h12v1h-12zM7 16h6v1h-6zM15 16h3v1h-3zM16 17h3v1h-3zM17 18h1v1h-1z"/></svg>';
@@ -1655,7 +1661,7 @@ function restoreModel(e) {
   if (S.preview) cancelPreview(); const had = S.parts.length > 0;
   setModel(e.pos, e.idx, e.name); S.labels = e.labels.slice(); S.groups = e.groups.map(g => ({ ...g })); S.active = e.active; S.hist.seg = e.seg; S.hist.parts = e.hp; colorAll();
   S.parts = e.parts.slice(); S.partsSel = e.partsSel; S.placed = null; if (had || S.parts.length) { renderParts(); renderPartLists(); }
-  syncExport(); renderGroups(); statsUI(); setHud(); enableSteps();
+  $('#btnExport').disabled = true; renderGroups(); statsUI(); setHud(); enableSteps();
 }
 var HLB = null, HLBt = -1e9;
 function histNote(l) { HLB = l; HLBt = performance.now(); }
@@ -1956,7 +1962,7 @@ const partLineMat = new THREE.LineBasicMaterial({ color: 0xff5a4d, depthTest: fa
 function partGeoDrop(e) { if (e.g.disposeBoundsTree) e.g.disposeBoundsTree(); e.g.dispose(); if (e.lg) e.lg.dispose(); }
 function partGeoGet(p, wantLines) {
   let e = partGeoCache.get(p.id);
-  if (!e || e.p.pos !== p.pos) {
+  if (!e || e.p !== p) {
     if (e) partGeoDrop(e);
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p.pos, 3));
     g.setAttribute('normal', new THREE.BufferAttribute(vertexNormals(p.pos, p.idx), 3)); g.setIndex(new THREE.BufferAttribute(p.idx, 1));
@@ -2139,15 +2145,71 @@ async function saveFile(filename, data) {
   if (dl) { try { await dl.save({ filename, data }); toast('Đã lưu ' + filename); } catch (e) { if (e && e.code === 'declined') toast('Đã hủy lưu file.'); else toast('Không lưu được file: ' + (e && e.message || e), true); } return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data])); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
 }
+function fillZipPieces(zip, bed) {
+  let i = 1; for (const p of S.placed) zip.file(String(i++).padStart(2, '0') + '_' + slug(p.name) + '.stl', binSTL([p], bed));
+  zip.file('ban-in-tat-ca.stl', binSTL(S.placed, bed));
+}
 async function exportZip() {
-  /* xếp lên bàn tự động lúc xuất: lật phẳng, đóng lỗ hở, bàn tự nới nếu chưa đủ chỗ */
-  let bed = 256, r = layoutParts({ bed, gap: 6, flat: true, close: true });
-  for (let t = 0; !r.fits && t < 6; t++) { bed = Math.ceil(bed * 1.25); r = layoutParts({ bed, gap: 6, flat: true, close: true }); }
-  const placed = r.placed, zip = new JSZip(); let i = 1;
-  for (const p of placed) zip.file(String(i++).padStart(2, '0') + '_' + slug(p.name) + '.stl', binSTL([p], bed));
-  zip.file('ban-in-tat-ca.stl', binSTL(placed, bed));
+  const bed = S.bed || 256, zip = new JSZip();
+  fillZipPieces(zip, bed);
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
   await saveFile('tach-khop-' + slug(S.name) + '.zip', blob);
+}
+/* ---------- Tải file: cả mô hình với các bộ phận đã tách, giữ đúng vị trí lắp ráp (không xếp phẳng lại) ---------- */
+function assembledParts() { return S.parts.filter(p => p.vis); }
+async function exportAssembled({ obj, stl }) {
+  const parts = assembledParts(), base = 'tach-khop-lap-rap-' + slug(S.name);
+  if (obj && stl) {
+    const zip = new JSZip(); zip.file(base + '.obj', objText(parts, 0)); zip.file(base + '.stl', binSTL(parts, 0));
+    await saveFile(base + '.zip', await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }));
+  } else if (obj) await saveFile(base + '.obj', objText(parts, 0));
+  else if (stl) await saveFile(base + '.stl', binSTL(parts, 0));
+}
+async function exportBoth({ obj, stl }) {
+  const zip = new JSZip(), bed = S.bed || 256, base = 'lap-rap-' + slug(S.name);
+  fillZipPieces(zip.folder('tung-manh'), bed);
+  const fb = zip.folder('mo-hinh-lap-rap'), parts = assembledParts();
+  if (obj) fb.file(base + '.obj', objText(parts, 0));
+  if (stl) fb.file(base + '.stl', binSTL(parts, 0));
+  await saveFile('tach-khop-ca-hai-' + slug(S.name) + '.zip', await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }));
+}
+/* hộp hỏi kiểu tải file khi bấm Tải (nút chính và mục Xuất trong menu Tệp đều qua đây) */
+function dlModeAsk() {
+  let mode = 'A'; try { mode = localStorage.getItem('tk_dlMode') || 'A'; } catch (e) { }
+  let f = {}; try { f = JSON.parse(localStorage.getItem('tk_dlFmt') || '{}'); } catch (e) { }
+  const obj = f.obj !== false, stl = f.stl === true;
+  return new Promise(res => {
+    const ov = document.createElement('div'); ov.className = 'ksOv dlOv';
+    ov.innerHTML = '<div class="ksBox dlBox" role="dialog" aria-modal="true" aria-labelledby="dlTtl">' +
+      '<h3 id="dlTtl">Tải file thế nào?</h3>' +
+      '<label class="dlOpt"><input type="radio" name="dlm" value="A"' + (mode === 'A' ? ' checked' : '') + '><span><b>Từng mảnh nhỏ để in</b><br><span class="dlSub">Mỗi bộ phận một file STL, xếp phẳng lên bàn in.</span></span></label>' +
+      '<label class="dlOpt"><input type="radio" name="dlm" value="B"' + (mode === 'B' ? ' checked' : '') + '><span><b>Cả mô hình với các bộ phận đã tách</b><br><span class="dlSub">Một file, các bộ phận giữ đúng vị trí lắp ráp.</span></span></label>' +
+      '<label class="dlOpt"><input type="radio" name="dlm" value="C"' + (mode === 'C' ? ' checked' : '') + '><span><b>Cả hai</b><br><span class="dlSub">Một file zip gồm cả hai kiểu trên.</span></span></label>' +
+      '<div class="dlFmt"><span class="dlFmtLb">Định dạng</span><label class="chk"><input type="checkbox" id="dlFObj"' + (obj ? ' checked' : '') + '>OBJ</label><label class="chk"><input type="checkbox" id="dlFStl"' + (stl ? ' checked' : '') + '>STL</label></div>' +
+      '<div class="ksBt"><button class="btn pri" id="dlGo" type="button"></button><button class="btn" id="dlNo" type="button"></button></div></div>';
+    const go = ov.querySelector('#dlGo'), no = ov.querySelector('#dlNo');
+    go.textContent = shTxt('Tải xuống', 'Download'); no.textContent = shTxt('Hủy', 'Cancel');
+    const syncFmt = () => ov.querySelector('.dlFmt').classList.toggle('hide', ov.querySelector('input[name=dlm]:checked').value === 'A');
+    ov.querySelectorAll('input[name=dlm]').forEach(r => r.onchange = syncFmt); syncFmt();
+    const close = v => { removeEventListener('keydown', onKey); ov.remove(); res(v); };
+    const onKey = e => { if (e.key === 'Escape') close(null); };
+    addEventListener('keydown', onKey);
+    ov.addEventListener('click', e => { if (e.target === ov) close(null); });
+    no.onclick = () => close(null);
+    go.onclick = () => {
+      const m = ov.querySelector('input[name=dlm]:checked').value, fObj = ov.querySelector('#dlFObj').checked, fStl = ov.querySelector('#dlFStl').checked;
+      if (m !== 'A' && !fObj && !fStl) { toast('Hãy chọn ít nhất một định dạng (STL hoặc OBJ).', true); return; }
+      try { localStorage.setItem('tk_dlMode', m); localStorage.setItem('tk_dlFmt', JSON.stringify({ obj: fObj, stl: fStl })); } catch (e) { }
+      close({ mode: m, obj: fObj, stl: fStl });
+    };
+    document.body.appendChild(ov);
+    (ov.querySelector('input[value="' + mode + '"]') || ov.querySelector('input[name=dlm]')).focus();
+  });
+}
+async function dlRun(choice) {
+  if (choice.mode === 'A') return exportZip();
+  if (choice.mode === 'B') return exportAssembled(choice);
+  return exportBoth(choice);
 }
 /* ---------- lưu / mở dự án (.zip) ---------- */
 const u8 = a => new Uint8Array(a.buffer, a.byteOffset, a.byteLength);
@@ -2179,39 +2241,24 @@ async function openProject(file) {
 const hud = $('#hud');
 function setHud() { hud.hidden = !S.pos; if (S.pos) { $('#hudF').textContent = `${fmt(S.nF)} mặt`; $('#hudD').textContent = `${S.bb.size.map(uTxt).join(' x ')} ${UNIT}`; } }
 $('#hudMin').onclick = () => { const m = hud.classList.toggle('min'); $('#hudMin').textContent = m ? '+' : '-'; };
-/* Chọn ngăn xếp lịch sử: không phân biệt đang ở bước nào, luôn chọn ngăn (model/seg/parts)
-   có thao tác mới nhất theo thời gian thực. Widget Đổi kích thước (scope 'model') có thể push
-   vào S.hist.model từ bất kỳ bước nào, nên Ctrl+Z phải so sánh cả 3 ngăn mỗi lần, giống Word/Photoshop:
-   luôn hoàn tác đúng việc vừa làm gần nhất, bất kể nó rơi vào ngăn nào.
-   - Khi hoàn tác (kind 'u'): so theo .t, thời điểm thao tác được thực hiện.
-   - Khi làm lại (kind 'r'): so theo .ut, thời điểm thao tác đó bị hoàn tác (để Redo trả đúng
-     thứ tự ngược lại của các lần Ctrl+Z liên tiếp, dù chúng thuộc nhiều ngăn khác nhau). */
-function pickHist(kind) {
-  const buckets = [S.hist.model, S.hist.seg, S.hist.parts], field = kind === 'r' ? 'ut' : 't';
-  let best = null, bestT = -1;
-  for (const h of buckets) { const a = h[kind]; if (a.length) { const last = a[a.length - 1], t = last[field] ?? last.t; if (t > bestT) { bestT = t; best = h; } } }
-  return best || S.hist.model;
-}
 function refreshUndo() {
-  const hu = pickHist('u'), hr = pickHist('r');
-  $('#btnUndo').classList.toggle('off', !hu.u.length); $('#btnRedo').classList.toggle('off', !hr.r.length);
-  $('#histCnt').textContent = '-' + hu.u.length + ' +' + hr.r.length; $('#viewBar').hidden = !S.pos; $('#navCube').hidden = !S.pos;
+  const h = S.step === 1 ? S.hist.model : S.step === 2 ? S.hist.seg : S.hist.parts;
+  $('#btnUndo').classList.toggle('off', !h.u.length); $('#btnRedo').classList.toggle('off', !h.r.length);
+  $('#histCnt').textContent = '-' + h.u.length + ' +' + h.r.length; $('#viewBar').hidden = !S.pos; $('#navCube').hidden = !S.pos;
   $('#undoBar').hidden = !S.pos; $('#toolbar').hidden = !(S.pos && S.step === 2);
 }
 function undo() {
   if (S.preview) return;
-  const h = pickHist('u'); if (!h.u.length) return toast('Chưa có gì để hoàn tác.'); const e = h.u.pop(); const ut = Date.now();
-  if (h === S.hist.model) { h.r.push(Object.assign(snapModel(), { lb: e.lb, t: e.t, ut })); restoreModel(e); }
-  else if (h === S.hist.seg) { h.r.push(Object.assign(snapSeg(), { lb: e.lb, t: e.t, ut })); restoreSeg(e); }
-  else { h.r.push(Object.assign(snapParts(), { lb: e.lb, t: e.t, ut })); S.placed = null; restoreParts(e); }
+  if (S.step === 1) { const h = S.hist.model; if (!h.u.length) return toast('Chưa có gì để hoàn tác.'); const e = h.u.pop(); h.r.push(Object.assign(snapModel(), { lb: e.lb, t: e.t })); restoreModel(e); }
+  else if (S.step === 2) { const h = S.hist.seg; if (!h.u.length) return toast('Chưa có gì để hoàn tác.'); const e = h.u.pop(); h.r.push(Object.assign(snapSeg(), { lb: e.lb, t: e.t })); restoreSeg(e); }
+  else if (S.step >= 3) { const h = S.hist.parts; if (!h.u.length) return toast('Chưa có gì để hoàn tác.'); const e = h.u.pop(); h.r.push(Object.assign(snapParts(), { lb: e.lb, t: e.t })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
 function redo() {
   if (S.preview) return;
-  const h = pickHist('r'); if (!h.r.length) return; const e = h.r.pop(); const t = Date.now();
-  if (h === S.hist.model) { h.u.push(Object.assign(snapModel(), { lb: e.lb, t })); restoreModel(e); }
-  else if (h === S.hist.seg) { h.u.push(Object.assign(snapSeg(), { lb: e.lb, t })); restoreSeg(e); }
-  else { h.u.push(Object.assign(snapParts(), { lb: e.lb, t })); S.placed = null; restoreParts(e); }
+  if (S.step === 1) { const h = S.hist.model; if (!h.r.length) return; const e = h.r.pop(); h.u.push(Object.assign(snapModel(), { lb: e.lb, t: e.t })); restoreModel(e); }
+  else if (S.step === 2) { const h = S.hist.seg; if (!h.r.length) return; const e = h.r.pop(); h.u.push(Object.assign(snapSeg(), { lb: e.lb, t: e.t })); restoreSeg(e); }
+  else if (S.step >= 3) { const h = S.hist.parts; if (!h.r.length) return; const e = h.r.pop(); h.u.push(Object.assign(snapParts(), { lb: e.lb, t: e.t })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
 $('#btnUndo').onclick = undo; $('#btnRedo').onclick = redo;
@@ -2219,7 +2266,7 @@ $('#btnFit').onclick = () => { const b = new THREE.Box3(); if (S.step >= 3) b.se
 addEventListener('keydown', e => { if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); } });
 
 function goStep(n) {
-  if (!S.pos) return; if (n === 4 && !S.parts.length) ensureParts();
+  if (!S.pos) return; if (n === 4 && !S.parts.length) return toast('Hãy tạo bộ phận ở bước 3 trước.', true);
   if (S.preview) cancelPreview();
   S.step = n; applyControlMode(); document.getElementById('cat').dataset.step = n; selStepChanged(n); fxStepChanged(n);
   $$('.steps button').forEach(b => b.classList.toggle('on', +b.dataset.step === n));
@@ -2227,7 +2274,7 @@ function goStep(n) {
   modelGroup.visible = n <= 2; partsGroup.visible = n >= 3; bedGroup.visible = n === 4 && !!S.placed;
   $('#drop').hidden = !!S.pos;
   if (n === 2) { renderGroups(); setTool(S.tool); }
-  if (n === 3) { S.placed = null; syncExport(); renderPartLists(); renderParts(); updateCutPlane(); syncPartPanels(); }
+  if (n === 3) { S.placed = null; $('#btnExport').disabled = true; renderPartLists(); renderParts(); updateCutPlane(); syncPartPanels(); }
   if (n === 4) { renderPartLists(); if (S.placed) renderParts({ list: S.placed }); else renderParts(); }
   if (n !== 3) cutPlane.visible = false; if (n !== 2) ring.visible = false;
   refreshUndo(); invalidate(); refreshScales();
@@ -2235,10 +2282,7 @@ function goStep(n) {
   setTimeout(() => { if (S.step === n) maybeGuide(STEP_GUIDES[n][0]); }, 700);
 }
 $$('.steps button').forEach(b => b.onclick = () => goStep(+b.dataset.step));
-function enableSteps() { $$('.steps button').forEach(b => { const n = +b.dataset.step; b.disabled = !S.pos; }); $('#btnSave').disabled = !S.pos; syncExport(); }
-/* Không ép thứ tự: chưa có bộ phận thì tự tạo (từ nhóm mặt nếu có nhiều nhóm, không thì cả mô hình) */
-function ensureParts() { if (!S.pos || S.parts.length) return; pushParts(); S.parts = S.groups.length > 1 ? partsFromGroups() : wholePart(); S.partsSel = -1; S.partsFrom = S.groups.length > 1 ? 'groups' : 'whole'; }
-function syncExport() { const b = $('#btnExport'); if (b) b.disabled = !S.pos || (S.parts.length > 0 && !S.parts.some(p => p.vis)); }
+function enableSteps() { $$('.steps button').forEach(b => { const n = +b.dataset.step; b.disabled = !S.pos || (n === 4 && !S.parts.length); }); $('#btnSave').disabled = !S.pos; }
 
 /* ---------- bước 1: nhập ---------- */
 function statsUI() {
@@ -2509,8 +2553,8 @@ function groupsNestSel(ix) {
 }
 const LY_G = { sel: new Set(), anchor: { v: null },
   act: i => { S.active = i; renderGroups(); },
-  vis: (ix, v) => { histNote('Ẩn/hiện nhóm'); pushSeg(); S.soloG = null; lyEnsure(); const all = new Set(ix); ix.forEach(i => lyDesc(i).forEach(k => all.add(k))); all.forEach(i => { S.groups[i].visible = v; }); applyVisibility(); renderGroups(); },
-  lock: (ix, v) => { histNote('Khóa/mở khóa nhóm'); pushSeg(); lyEnsure(); const all = new Set(ix); ix.forEach(i => lyDesc(i).forEach(k => all.add(k))); all.forEach(i => { S.groups[i].locked = v; }); renderGroups(); toast(v ? 'Đã khóa nhóm. Cọ, tô và chọn sẽ bỏ qua nhóm này.' : 'Đã mở khóa nhóm.'); },
+  vis: (ix, v) => { S.soloG = null; lyEnsure(); const all = new Set(ix); ix.forEach(i => lyDesc(i).forEach(k => all.add(k))); all.forEach(i => { S.groups[i].visible = v; }); applyVisibility(); renderGroups(); },
+  lock: (ix, v) => { lyEnsure(); const all = new Set(ix); ix.forEach(i => lyDesc(i).forEach(k => all.add(k))); all.forEach(i => { S.groups[i].locked = v; }); renderGroups(); toast(v ? 'Đã khóa nhóm. Cọ, tô và chọn sẽ bỏ qua nhóm này.' : 'Đã mở khóa nhóm.'); },
   del: groupsDelete, move: groupsMove, solo: groupsSolo, nest: groupsNest, group: groupsNestSel,
   fold: i => { lyEnsure(); const g = S.groups[i]; if (g) { g.open = g.open === false; renderGroups(); } } };
 function renderGroups() {
@@ -2557,7 +2601,7 @@ bind('#rAngle', '#vAngle'); bind('#rCount', '#vCount'); bind('#rMin', '#vMin'); 
 $('#rCount').addEventListener('input', () => $$('#presets button').forEach(x => x.classList.toggle('on', x.dataset.n === $('#rCount').value)));
 $('#btnSmooth').onclick = () => busy('Đang khử răng cưa viền vùng chọn…', async () => { pushSeg(); const c = smoothBorders(3); colorAll(); renderGroups(); toast(c ? `Đã làm mượt (${fmt(c)} mặt đổi nhóm).` : 'Biên đã mượt sẵn.'); });
 $('#btnNew').onclick = () => { pushSeg(); S.groups.push(newGroup(S.groups.length)); S.active = S.groups.length - 1; renderGroups(); toast('Đã tạo nhóm mới. Dùng Cọ để tô vào nhóm này.'); };
-$('#btnShowAll').onclick = () => { histNote('Hiện tất cả'); pushSeg(); S.soloG = null; S.groups.forEach(g => g.visible = true); applyVisibility(); renderGroups(); };
+$('#btnShowAll').onclick = () => { S.soloG = null; S.groups.forEach(g => g.visible = true); applyVisibility(); renderGroups(); };
 $$('#toolbar .tool').forEach(b => b.onclick = () => { setTool(b.dataset.tool); if (b.dataset.tool !== 'orbit') maybeGuide(b.dataset.tool); });
 $('#to3').onclick = () => { if (S.preview) return toast('Hãy chốt hoặc bỏ phần xem trước trước.', true); S.groups.forEach(g => g.visible = true); applyVisibility(); compactGroups(); colorAll(); goStep(3); };
 
@@ -2566,18 +2610,18 @@ $('#to3').onclick = () => { if (S.preview) return toast('Hãy chốt hoặc bỏ
 function partsSoloOff() {
   if (!S.soloP) return false; const sv = S.soloP; S.soloP = null;
   S.parts.forEach(p => { p.vis = sv[p.id] !== undefined ? sv[p.id] : true; });
-  S.placed = null; syncExport(); bedGroup.visible = false; renderParts(); renderPartLists(); return true;
+  S.placed = null; $('#btnExport').disabled = true; bedGroup.visible = false; renderParts(); renderPartLists(); return true;
 }
 function partsSolo(p) {
   if (!p) return;
   if (S.soloP) { partsSoloOff(); toast('Đã hiện lại tất cả bộ phận.'); return; }
   const sv = {}; S.parts.forEach(q => { sv[q.id] = q.vis; }); S.soloP = sv; S.parts.forEach(q => { q.vis = q === p; });
-  S.placed = null; syncExport(); bedGroup.visible = false; renderParts(); renderPartLists(); toast('Chỉ hiện bộ phận này. Giữ lâu lần nữa để hiện lại tất cả.');
+  S.placed = null; $('#btnExport').disabled = true; bedGroup.visible = false; renderParts(); renderPartLists(); toast('Chỉ hiện bộ phận này. Giữ lâu lần nữa để hiện lại tất cả.');
 }
 const selPartId = () => { const p = S.parts[S.partsSel]; return p ? p.id : null; };
-const LY_PV = (ix, v) => { histNote('Ẩn/hiện bộ phận'); pushParts(); S.soloP = null; ix.forEach(i => { S.parts[i] = Object.assign({}, S.parts[i], { vis: v }); }); S.placed = null; syncExport(); bedGroup.visible = false; renderParts(); renderPartLists(); };
+const LY_PV = (ix, v) => { S.soloP = null; ix.forEach(i => { S.parts[i].vis = v; }); S.placed = null; $('#btnExport').disabled = true; bedGroup.visible = false; renderParts(); renderPartLists(); };
 const LY_P = { sel: new Set(), anchor: { v: null }, act: i => selectPart(i), vis: LY_PV, solo: i => partsSolo(S.parts[i]),
-  lock: (ix, v) => { histNote('Khóa/mở khóa bộ phận'); pushParts(); ix.forEach(i => { S.parts[i] = Object.assign({}, S.parts[i], { locked: v }); }); renderPartLists(); toast(v ? 'Đã khóa bộ phận. Các công cụ sẽ bỏ qua bộ phận này.' : 'Đã mở khóa bộ phận.'); },
+  lock: (ix, v) => { ix.forEach(i => { S.parts[i].locked = v; }); renderPartLists(); toast(v ? 'Đã khóa bộ phận. Các công cụ sẽ bỏ qua bộ phận này.' : 'Đã mở khóa bộ phận.'); },
   del: ix => {
     const kill = new Set(ix.filter(i => S.parts[i] && !S.parts[i].locked).map(i => S.parts[i].id));
     if (!kill.size) { toast('Bộ phận đang bị khóa nên không xóa được. Bấm ổ khóa để mở khóa.', true); return; }
@@ -2604,7 +2648,7 @@ function fillExtTargets() {
   const sel = $('#extTarget'), p = S.parts[S.partsSel]; sel.innerHTML = '<option value="all">Tất cả viền hở</option>';
   if (p && p.hmap) { const tags = new Set(p.hmap.values()); [...tags].sort((a, b) => a - b).forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t < 0 ? 'Lỗ hở sẵn của mô hình' : 'Giáp với Bộ phận ' + (t + 1); sel.appendChild(o); }); }
 }
-function afterPartsChange(msg) { S.placed = null; syncExport(); enableSteps(); syncPartPanels(); renderPartLists(); renderParts(); updateCutPlane(); refreshUndo(); if (msg) toast(msg); }
+function afterPartsChange(msg) { S.placed = null; $('#btnExport').disabled = true; enableSteps(); syncPartPanels(); renderPartLists(); renderParts(); updateCutPlane(); refreshUndo(); if (msg) toast(msg); }
 $('#btnMkGroups').onclick = () => busy('Đang tạo bộ phận…', async () => { pushParts(); S.parts = partsFromGroups(); S.partsSel = -1; S.partsFrom = 'groups'; afterPartsChange(`Đã tạo ${S.parts.length} bộ phận.`); frameModel(new THREE.Box3().setFromObject(partsGroup)); });
 $('#btnMkWhole').onclick = () => { pushParts(); S.parts = wholePart(); S.partsSel = 0; S.partsFrom = 'whole'; afterPartsChange('Đã dùng cả mô hình làm 1 bộ phận.'); };
 $('#btnRebuild').onclick = () => busy('Đang tạo lại…', async () => { pushParts(); S.parts = partsFromGroups(); S.partsSel = -1; afterPartsChange('Đã tạo lại bộ phận từ nhóm mặt.'); });
@@ -2625,7 +2669,17 @@ $('#btnCut').onclick = () => { const p = needSel(); if (!p) return; busy('Đang 
 $('#to4').onclick = () => goStep(4);
 
 /* ---------- bước 4: hoàn tất ---------- */
-$('#btnExport').onclick = () => { if (!S.pos) return; ensureParts(); if (!S.parts.some(p => p.vis)) return toast('Mọi bộ phận đang ẩn. Hãy hiện ít nhất một bộ phận.', true); busy('Đang xếp và nén các mảnh STL…', exportZip); };
+$('#btnLayout').onclick = () => busy('Đang xếp bộ phận lên khay…', async () => {
+  const bed = +$('#bedMM').value || 256, gap = +$('#gapMM').value || 0, r = layoutParts({ bed, gap, flat: $('#layFlat').checked, close: $('#autoClose').checked });
+  S.placed = r.placed; S.bed = bed; drawBed(bed); bedGroup.visible = true; renderParts({ list: S.placed }); $('#btnExport').disabled = !S.placed.length;
+  $('#layNote').textContent = r.fits ? `Đã xếp ${r.placed.length} mảnh, đủ chỗ trên bàn ${bed} mm.` : `Đã xếp ${r.placed.length} mảnh nhưng không đủ chỗ trên bàn ${bed} mm. Tăng cạnh bàn hoặc chia thành nhiều lượt in.`;
+  const b = new THREE.Box3().setFromObject(bedGroup); frameModel(b);
+});
+$('#btnExport').onclick = async () => {
+  if (!S.placed) return;
+  const choice = await dlModeAsk(); if (!choice) return;
+  busy(shTxt('Đang chuẩn bị file…', 'Preparing the file…'), () => dlRun(choice));
+};
 $('#btnSave').onclick = () => busy('Đang đóng gói dự án…', saveProject);
 $('#fileProj').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; busy('Đang mở dự án…', async () => { await openProject(f); statsUI(); setHud(); enableSteps(); $('#drop').hidden = true; S.lastFramed = 0; frameModel(); goStep(S.parts.length ? 3 : 2); toast('Đã mở dự án.'); }); };
 window.__TK = { S, THREE, setModel, weld, segmentFaces, cutPart, extrudeBorder, thickenPart, flatQuat, layoutParts, CSG: () => CSG, BVH: () => BVH };
@@ -2701,16 +2755,20 @@ const GUIDES = {
     { t: 'Chọn khớp A là phần cắm vào, và thân B là phần bị khoét.', sel: '#subA' },
     { t: 'Em lấy B trừ đi A và chừa khe hở để lắp vừa. Khe hở 0.2 mm thường vừa để in.', sel: '#rSubClr' },
     { t: 'Bấm Trừ A khỏi B. A giữ nguyên, B có hốc đúng hình A.', sel: '#btnSub' }] },
+  layout: { title: 'Xếp lên bàn in', chip: 'Xếp', demo: 'layout', steps: [
+    { t: 'Nhập cạnh bàn in và khoảng cách giữa các mảnh, tính bằng mm.', sel: '#bedMM' },
+    { t: 'Tự lật nằm phẳng cho mỗi mảnh một mặt áp xuống bàn. Tự đóng lỗ để mảnh thành khối kín.', sel: '#layFlat' },
+    { t: 'Bấm Xếp bộ phận để em sắp chúng lên bàn.', sel: '#btnLayout' }] },
   scale: { title: 'Đổi kích thước', chip: 'Scale', demo: 'scale', steps: [
     { t: 'Muốn phóng to hoặc thu nhỏ? Mục Kích thước có ở cả 4 bước, dùng được trước và sau khi cắt.', sel: '.step.on .scale' },
     { t: 'Theo cm: gõ chiều Ngang, Cao hoặc Sâu mong muốn. Mô hình đổi ngay, chỉ đúng trục đó, hai trục kia giữ nguyên.', sel: '.step.on .sc-dims' },
     { t: 'Theo %: gõ 150 là to gấp rưỡi, 50 là nhỏ một nửa. Mô hình đổi ngay và đều cả 3 chiều.', sel: '.step.on .sc-pct' },
     { t: 'Sau khi cắt, chọn Tất cả bộ phận để giữ khớp với nhau. Chọn một bộ phận thì chỉ mảnh đó đổi, có thể không còn vừa mảnh bên cạnh.', sel: '.step.on .sc-target' }] },
   export: { title: 'Xuất file', chip: 'Xuất', demo: 'export', steps: [
-    { t: 'Tách xong là bấm Tải zip được ngay, không cần qua bước nào khác. App tự lật phẳng và xếp các mảnh lên bàn, trục Z hướng lên.', sel: '#btnExport' },
-    { t: 'Muốn làm tiếp lần sau thì bấm Lưu dự án. Muốn làm nam châm, Spin hay Clicker thì chọn ở khung Làm tiếp bên dưới.', sel: '.nxt' }] },
+    { t: 'Bấm Tải, em hỏi tải từng mảnh để in hay cả mô hình đã lắp ráp. Từng mảnh thì có zip, mỗi mảnh một file STL và một file bàn in gộp, trục Z hướng lên.', sel: '#btnExport' },
+    { t: 'Muốn làm tiếp lần sau thì bấm Lưu dự án ở góc trên.', sel: '#btnSave' }] },
 };
-const STEP_GUIDES = { 1: ['import', 'touch', 'scale'], 2: ['auto', 'brush', 'select', 'fill', 'merge', 'groups', 'scale'], 3: ['parts', 'ext', 'shell', 'cut', 'sub', 'scale'], 4: ['export', 'scale'] };
+const STEP_GUIDES = { 1: ['import', 'touch', 'scale'], 2: ['auto', 'brush', 'select', 'fill', 'merge', 'groups', 'scale'], 3: ['parts', 'ext', 'shell', 'cut', 'sub', 'scale'], 4: ['layout', 'export', 'scale'] };
 
 const catEl = $('#cat'), bub = $('#catBubble'), reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (reduced) document.querySelectorAll('#cat animate').forEach(a => a.remove());
@@ -2853,7 +2911,7 @@ function scaleModel(f, live) {
   const np = new Float32Array(S.pos.length); for (let i = 0; i < np.length; i += 3) { np[i] = S.pos[i] * f[0]; np[i + 1] = S.pos[i + 1] * f[1]; np[i + 2] = S.pos[i + 2] * f[2]; }
   setModel(np, S.idx, S.name); S.labels = L; S.groups = G; S.active = act; S.hist.seg = hist; colorAll();
   if (had) { S.parts = S.parts.map(p => scalePart(p, f, [0, 0, 0])); S.hist.parts = { u: [], r: [] }; S.partsSel = -1; renderParts(); renderPartLists(); }
-  S.placed = null; syncExport(); statsUI(); setHud(); refreshUndo(); if (!live) frameModel();
+  S.placed = null; $('#btnExport').disabled = true; statsUI(); setHud(); refreshUndo(); if (!live) frameModel();
   if (!live) toast(`Đã đổi kích thước: ${uSz(S.bb.size)} ${UNIT}.` + (had ? ' Các bộ phận đã đổi theo.' : ''));
 }
 function scaleParts(b, f, live) {
@@ -2864,7 +2922,7 @@ function scaleParts(b, f, live) {
   for (const i of idxs) S.parts[i] = scalePart(S.parts[i], f, c);
   afterPartsChange(live ? '' : selOnly ? `Đã đổi kích thước ${S.parts[S.partsSel].name}.` : 'Đã đổi kích thước tất cả bộ phận.');
   if (!live) { const box = new THREE.Box3().setFromObject(partsGroup); if (!box.isEmpty() && S.step === 3) frameModel(box); }
-  
+  if (hadPlaced && S.step === 4) $('#btnLayout').onclick();
 }
 mountScale($('#scale1'), 'model'); mountScale($('#scale2'), 'model'); mountScale($('#scale3'), 'parts'); mountScale($('#scale4'), 'parts');
 /* ===== Chọn nhanh (kiểu Nomad): Lasso / Khung / Vùng / Khối liền ===== */
@@ -4759,24 +4817,13 @@ function mspImpRender() {
     <label class="chk"><input type="checkbox" id="mspImpZ" ${$('#pnZup').checked ? 'checked' : ''}>File STL có trục Z hướng lên</label>
     <div class="note">Đang có ${n} mảnh</div>
     ${n < 2 ? '<div class="mspWarn">Spin cần ít nhất 2 mảnh. Nạp thêm mảnh ở trên, hoặc tách mô hình trước.<button class="btn" data-a="split">Mở công cụ Tách khớp</button></div>' : ''}
-    ${S.parts.length > 1 && !(MSP.nMag > 0 && MG.res) ? `<button class="btn" data-a="parts">Nạp ${S.parts.length} bộ phận từ Tách khớp</button>` : ''}
     <button class="btn pri" data-a="go">Xong, sang đặt chốt</button>`;
 }
 $('#mspImp').onclick = e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
   if (a.dataset.a === 'x' || a.dataset.a === 'go') $('#mspImp').hidden = true;
   if (a.dataset.a === 'split') { $('#mspImp').hidden = true; setMode('joint'); }
-  if (a.dataset.a === 'parts') mspLoadParts();
 };
-/* nạp các bộ phận đã tách ở thẻ Tách khớp làm mảnh cho Spin (giữ nguyên vị trí lắp) */
-function mspLoadParts() {
-  const vis = S.parts.filter(p => p.vis); if (vis.length < 2) { toast('Cần ít nhất 2 bộ phận đang hiện để nạp.', true); return; }
-  for (let i = PN.pieces.length - 1; i >= 0; i--) if (PN.pieces[i].seed) { pnDropPiece(PN.pieces[i]); PN.pieces.splice(i, 1); }
-  if (!PN.pieces.length) { PN.shift = null; PN.scale = 1; }
-  const soups = vis.map(p => { const soup = new Float32Array(p.idx.length * 3); for (let i = 0; i < p.idx.length; i++) { soup[i * 3] = p.pos[p.idx[i] * 3]; soup[i * 3 + 1] = p.pos[p.idx[i] * 3 + 1]; soup[i * 3 + 2] = p.pos[p.idx[i] * 3 + 2]; } return { name: p.name, soup }; });
-  const before = PN.pieces.length; pnAddSoups(soups); for (let i = before; i < PN.pieces.length; i++) PN.pieces[i].seed = true; PN.seedKey = S.pos;
-  mspImpRender(); toast('Đã nạp ' + vis.length + ' bộ phận từ Tách khớp.');
-}
 $('#mspImp').onchange = e => { if (e.target.id === 'mspImpZ') $('#pnZup').checked = e.target.checked; };
 const _setMode2 = setMode;
 setMode = function (m) {
@@ -5115,7 +5162,7 @@ const histSec = document.createElement('div'); histSec.className = 'sec histSec'
 histSec.innerHTML = `<div class="histBox hnm"><div id="histList" class="hlist"></div></div>
   <div class="histBox"><h4>Snapshot</h4><div class="row2"><input class="num" id="snapName" type="text" placeholder="Tên snapshot (không bắt buộc)"><button class="btn sm pri" id="snapSave">Lưu snapshot</button></div><div id="snapList" class="hlist"></div></div>`;
 tipMake(histSec.querySelector(".histBox:not(.hnm) h4"), () => 'Snapshot nhớ trạng thái nhóm mặt và bộ phận ở thời điểm lưu, và lưu cùng dự án.');
-function histStack() { return pickHist('u'); }
+function histStack() { return S.step === 1 ? S.hist.model : S.step >= 3 ? S.hist.parts : S.hist.seg; }
 function histJump(target) {
   const h = histStack(); let guard = 200;
   while (h.u.length > target && guard--) undo();
@@ -5165,11 +5212,9 @@ histSec.addEventListener('click', e => { if (e.target.closest('#snapSave')) snap
 histSec.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'snapName') snapSave(); });
 {
   const mk = (id, key, title, fn) => { const b = document.createElement('button'); b.className = 'ic'; b.id = id; b.type = 'button'; b.title = title; b.setAttribute('aria-label', title); b.innerHTML = '<i class="icImg" style="--m:url(data:image/png;base64,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)"></i>'; b.onclick = fn; $('#undoBar').appendChild(b); return b; };
-  const bh = mk('btnHist', 'hist', 'Mở hoặc đóng cửa sổ Lịch sử', () => { if (!S.pos) { toast('Hãy mở một mô hình trước.', true); return; } if (histSec._dk) histSec._dk.win.querySelector('[data-a=back]').click(); else dkPop(histSec, { title: 'Lịch sử', perm: true, defMode: 'L' }); icSync(); });
-  bh.querySelector('.icImg').style.setProperty('--m', 'url(data:image/png;base64,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)');
   const bl = mk('btnLayer', 'layer', 'Mở hoặc đóng cửa sổ Layer', () => { if (MODE !== 'pin' && !S.pos) { toast('Hãy mở một mô hình trước.', true); return; } if (lySec._dk) lySec._dk.win.querySelector('[data-a=back]').click(); else if (MODE === 'pin') { PN_LY_SHUT = false; pnLayers(); } else lyfOpen(); icSync(); });
   bl.querySelector('.icImg').style.setProperty('--m', 'url(data:image/png;base64,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)');
-  window.icSync = () => { bl.classList.toggle('on', !!lySec._dk); bh.classList.toggle('on', !!histSec._dk); };
+  window.icSync = () => { bl.classList.toggle('on', !!lySec._dk); };
   new MutationObserver(() => icSync()).observe(stage, { childList: true });
 }
 { const _ru = refreshUndo; refreshUndo = function () { _ru(); histRender(); }; }
@@ -5422,11 +5467,7 @@ addEventListener('pagehide', () => { asSave(false); });
 async function asRestore(rec) {
   AS.hold = true;
   await busy('Đang khôi phục phiên làm việc…', async () => {
-    await openProject(rec.blob); statsUI(); setHud(); enableSteps(); $('#drop').hidden = true; S.lastFramed = 0; frameModel();
-    const m = ['magnet', 'pin', 'clicker'].includes(rec.mode) ? rec.mode : 'joint';
-    if (m === 'joint') { setMode('joint'); goStep(S.parts.length ? Math.min(Math.max(rec.step || 2, 2), 4) : 2); }
-    else { const max = MODE_DEF[m].ids.length - 1; MS[m] = Math.min(Math.max(rec.step || 1, 1), max); setMode(m); }
-    toast('Đã khôi phục phiên làm việc trước.');
+    await openProject(rec.blob); statsUI(); setHud(); enableSteps(); $('#drop').hidden = true; S.lastFramed = 0; frameModel(); setMode('joint'); goStep(S.parts.length ? Math.min(Math.max(rec.step || 2, 2), 4) : 2); toast('Đã khôi phục phiên làm việc trước.');
   });
   AS.hold = false; asSave(true);
 }
@@ -5592,25 +5633,11 @@ function ksInside(A, B) {
 /* nới A ra d theo pháp tuyến đỉnh để chừa khe hở */
 function ksGrow(p, d) { const vn = vertexNormals(p.pos, p.idx), pos = new Float32Array(p.pos.length); for (let i = 0; i < pos.length; i++) pos[i] = p.pos[i] + vn[i] * d; return { pos, idx: p.idx }; }
 /* hàn đỉnh có dung sai: gộp các đỉnh cách nhau chưa tới 0.01% cỡ mô hình, kể cả khi rơi vào hai ô lưới kề nhau (weld cũ làm tròn nên để hở dọc đường giao) */
-let ksWeldSkip = 0;
-/* bảng băm cạnh có hướng (mảng số, nhanh): add(a,b,t) trả về mặt đã có cạnh này hoặc -1; has(a,b) */
-function ksEdgeSet(nIdx) {
-  let SZ = 1; while (SZ < nIdx * 2) SZ <<= 1; const mask = SZ - 1, ka = new Int32Array(SZ).fill(-1), kb = new Int32Array(SZ), ti = new Int32Array(SZ);
-  const hs = (a, b) => { let h = Math.imul(a, 0x9E3779B1) ^ Math.imul(b + 0x7F4A7C15, 0x85EBCA6B); h ^= h >>> 15; return h & mask; };
-  return {
-    add(a, b, t) { let i = hs(a, b); while (ka[i] !== -1) { if (ka[i] === a && kb[i] === b) return ti[i]; i = (i + 1) & mask; } ka[i] = a; kb[i] = b; ti[i] = t; return -1; },
-    has(a, b) { let i = hs(a, b); while (ka[i] !== -1) { if (ka[i] === a && kb[i] === b) return true; i = (i + 1) & mask; } return false; }
-  };
-}
-/* hàn đỉnh có dung sai (bản nhanh, lưới băm bằng mảng số): gộp các đỉnh cách nhau chưa tới 0.01% cỡ mô hình */
 function ksWeld(soup) {
-  ksWeldSkip = 0;
   const nT = soup.length / 9, mn = [1e30, 1e30, 1e30], mx = [-1e30, -1e30, -1e30];
   for (let i = 0; i < soup.length; i += 3) for (let k = 0; k < 3; k++) { const v = soup[i + k]; if (v < mn[k]) mn[k] = v; if (v > mx[k]) mx[k] = v; }
   const span = Math.max(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) || 1, tol = span * 1e-4, inv = 1 / tol, t2 = tol * tol;
-  let SZ = 1; while (SZ < nT * 3 * 2) SZ <<= 1; const mask = SZ - 1, tk = new Float64Array(SZ).fill(-1), th = new Int32Array(SZ).fill(-1), nx = new Int32Array(nT * 3);
-  const slot = k => { const lo = k >>> 0, hi = (k / 4294967296) | 0; let h = Math.imul(lo, 0x9E3779B1) ^ Math.imul(hi + 0x7F4A7C15, 0x85EBCA6B); h ^= h >>> 15; let i = h & mask; while (tk[i] !== -1 && tk[i] !== k) i = (i + 1) & mask; return i; };
-  const pos = new Float32Array(soup.length), idx = new Uint32Array(nT * 3), tri = [0, 0, 0];
+  const cells = new Map(), pos = new Float32Array(soup.length), idx = new Uint32Array(nT * 3), tri = [0, 0, 0];
   let nv = 0, ni = 0;
   for (let t = 0; t < nT; t++) {
     for (let c = 0; c < 3; c++) {
@@ -5618,17 +5645,16 @@ function ksWeld(soup) {
       const cx = Math.floor((x - mn[0]) * inv) + 1, cy = Math.floor((y - mn[1]) * inv) + 1, cz = Math.floor((z - mn[2]) * inv) + 1;
       let id = -1;
       for (let a = -1; a <= 1 && id < 0; a++) for (let b = -1; b <= 1 && id < 0; b++) for (let d = -1; d <= 1 && id < 0; d++) {
-        const k = ((cx + a) * 16384 + (cy + b)) * 16384 + (cz + d), s = slot(k); if (tk[s] !== k) continue;
-        for (let q = th[s]; q >= 0; q = nx[q]) { const j = q * 3, dx = pos[j] - x, dy = pos[j + 1] - y, dz = pos[j + 2] - z; if (dx * dx + dy * dy + dz * dz < t2) { id = q; break; } }
+        const l = cells.get(((cx + a) * 16384 + (cy + b)) * 16384 + (cz + d)); if (!l) continue;
+        for (let q = 0; q < l.length; q++) { const j = l[q] * 3, dx = pos[j] - x, dy = pos[j + 1] - y, dz = pos[j + 2] - z; if (dx * dx + dy * dy + dz * dz < t2) { id = l[q]; break; } }
       }
       if (id < 0) {
         id = nv++; pos[id * 3] = x; pos[id * 3 + 1] = y; pos[id * 3 + 2] = z;
-        const k = (cx * 16384 + cy) * 16384 + cz, s = slot(k); if (tk[s] !== k) { tk[s] = k; th[s] = -1; }
-        nx[id] = th[s]; th[s] = id;
+        const k = (cx * 16384 + cy) * 16384 + cz, l = cells.get(k); if (l) l.push(id); else cells.set(k, [id]);
       }
       tri[c] = id;
     }
-    if (tri[0] === tri[1] || tri[1] === tri[2] || tri[0] === tri[2]) { ksWeldSkip++; continue; }
+    if (tri[0] === tri[1] || tri[1] === tri[2] || tri[0] === tri[2]) continue;
     idx[ni++] = tri[0]; idx[ni++] = tri[1]; idx[ni++] = tri[2];
   }
   return { pos: pos.slice(0, nv * 3), idx: idx.slice(0, ni) };
@@ -5668,163 +5694,22 @@ function ksFixT(pos, idx0) {
   }
   return Uint32Array.from(idx);
 }
-/* bỏ các mảnh vụn rời (chấm li ti) sau khi khoét: giữ các cụm mặt lớn, xóa cụm nhỏ không dính vào thân */
-function ksDropDebris(p) {
-  const nv = p.pos.length / 3, nt = p.idx.length / 3, par = new Int32Array(nv);
-  for (let i = 0; i < nv; i++) par[i] = i;
-  const find = x => { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; };
-  for (let t = 0; t < nt; t++) { const a = find(p.idx[t * 3]), b = find(p.idx[t * 3 + 1]), c = find(p.idx[t * 3 + 2]); if (a !== b) par[a] = b; const b2 = find(b); if (c !== b2) par[c] = b2; }
-  const cnt = new Map(); let mx = 0;
-  for (let t = 0; t < nt; t++) { const r = find(p.idx[t * 3]), n = (cnt.get(r) || 0) + 1; cnt.set(r, n); if (n > mx) mx = n; }
-  const minKeep = Math.max(200, Math.floor(mx * 0.01)), lo = new Map(), hi = new Map(); let dropped = 0, gmn = [1e30, 1e30, 1e30], gmx = [-1e30, -1e30, -1e30];
-  for (let v = 0; v < nv; v++) { const r = find(v); let a = lo.get(r), b = hi.get(r); if (!a) { a = [1e30, 1e30, 1e30]; b = [-1e30, -1e30, -1e30]; lo.set(r, a); hi.set(r, b); } for (let c = 0; c < 3; c++) { const x = p.pos[v * 3 + c]; if (x < a[c]) a[c] = x; if (x > b[c]) b[c] = x; if (x < gmn[c]) gmn[c] = x; if (x > gmx[c]) gmx[c] = x; } }
-  const span = Math.max(gmx[0] - gmn[0], gmx[1] - gmn[1], gmx[2] - gmn[2]) || 1;
-  const junk = r => { if (cnt.get(r) >= minKeep) return false; const a = lo.get(r), b = hi.get(r); return Math.max(b[0] - a[0], b[1] - a[1], b[2] - a[2]) < span * 0.05; };
-  for (const [r, n] of cnt) if (junk(r)) dropped += n;
-  if (!dropped) return { pos: p.pos, idx: p.idx, dropped: 0 };
-  const map = new Int32Array(nv).fill(-1), pos = [], idx = []; let k = 0;
-  for (let t = 0; t < nt; t++) {
-    if (junk(find(p.idx[t * 3]))) continue;
-    for (let c = 0; c < 3; c++) { const v = p.idx[t * 3 + c]; if (map[v] < 0) { map[v] = k++; pos.push(p.pos[v * 3], p.pos[v * 3 + 1], p.pos[v * 3 + 2]); } idx.push(map[v]); }
-  }
-  return { pos: Float32Array.from(pos), idx: Uint32Array.from(idx), dropped };
-}
-/* vá các lỗ li ti (chấm) trên da sau khi khoét: lỗ nhỏ do thư viện cắt khối xóa nhầm vài tam giác, vá lại đúng bằng tam giác đó; lỗ lớn (miệng khoét) giữ nguyên */
-function ksPatchHoles(pos, idx0, maxEdges, extFrac) {
-  const nI = idx0.length, he = ksEdgeSet(nI), key = (a, b) => a * 16777216 + b;
-  for (let i = 0; i < nI; i += 3) for (let k = 0; k < 3; k++) he.add(idx0[i + k], idx0[i + (k + 1) % 3], i / 3);
-  const nxt = new Map(); let total = 0;
-  for (let i = 0; i < nI; i += 3) for (let k = 0; k < 3; k++) { const a = idx0[i + k], b = idx0[i + (k + 1) % 3]; if (!he.has(b, a)) { total++; const l = nxt.get(a); if (l) l.push(b); else nxt.set(a, [b]); } }
-  if (!nxt.size) return { idx: idx0, n: 0, left: 0 };
-  let mn = [1e30, 1e30, 1e30], mx = [-1e30, -1e30, -1e30];
-  for (let i = 0; i < pos.length; i += 3) for (let k = 0; k < 3; k++) { const v = pos[i + k]; if (v < mn[k]) mn[k] = v; if (v > mx[k]) mx[k] = v; }
-  const maxExt = (Math.max(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) || 1) * (extFrac || 0.03), used = new Set(), add = []; let n = 0;
-  for (const [a, list] of nxt) for (const b0 of list) {
-    if (used.has(key(a, b0))) continue;
-    const loop = [a], es = [key(a, b0)]; let to = b0, ok = false;
-    for (let s = 0; s < maxEdges; s++) {
-      if (to === a) { ok = true; break; }
-      loop.push(to); const l = nxt.get(to); if (!l) break;
-      let nb = -1; for (const c of l) { const kk = key(to, c); if (!used.has(kk) && !es.includes(kk)) { nb = c; break; } }
-      if (nb < 0) break; es.push(key(to, nb)); to = nb;
-    }
-    if (!ok || loop.length < 3) continue;
-    let lo = [1e30, 1e30, 1e30], hi = [-1e30, -1e30, -1e30];
-    for (const v of loop) for (let k = 0; k < 3; k++) { const x = pos[v * 3 + k]; if (x < lo[k]) lo[k] = x; if (x > hi[k]) hi[k] = x; }
-    if (Math.max(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) > maxExt) continue;
-    for (const e of es) used.add(e);
-    for (let k = 1; k < loop.length - 1; k++) add.push(loop[0], loop[k + 1], loop[k]);
-    n++;
-  }
-  if (!n) return { idx: idx0, n: 0, left: total };
-  const out = new Uint32Array(nI + add.length); out.set(idx0); out.set(add, nI);
-  return { idx: out, n, left: total - used.size };
-}
-/* chẩn đoán kết quả khoét: đếm cạnh hở, cạnh trùng chiều, và các cụm cạnh hở theo cỡ */
-function ksDiag(idx) {
-  if (!window.KS_DIAG) return 'đã tắt để chạy nhanh';
-  const m = new Map(), key = (a, b) => a * 16777216 + b; let dup = 0;
-  for (let i = 0; i < idx.length; i += 3) for (let k = 0; k < 3; k++) { const e = key(idx[i + k], idx[i + (k + 1) % 3]); m.set(e, (m.get(e) || 0) + 1); }
-  const par = new Map(), find = x => { let r = x; while (par.get(r) !== r) r = par.get(r); while (par.get(x) !== r) { const n = par.get(x); par.set(x, r); x = n; } return r; };
-  const be = []; for (const [e, c] of m) { if (c > 1) dup++; const a = Math.floor(e / 16777216), b = e % 16777216; if (!m.has(key(b, a))) be.push([a, b]); }
-  for (const [a, b] of be) { if (!par.has(a)) par.set(a, a); if (!par.has(b)) par.set(b, b); const ra = find(a), rb = find(b); if (ra !== rb) par.set(ra, rb); }
-  const cs = new Map(); for (const [a] of be) { const r = find(a); cs.set(r, (cs.get(r) || 0) + 1); }
-  let s3 = 0, s16 = 0, big = 0, mx = 0; for (const n of cs.values()) { if (n <= 3) s3++; else if (n <= 16) s16++; else big++; if (n > mx) mx = n; }
-  return `hở ${be.length} cạnh / ${cs.size} cụm (≤3: ${s3}, ≤16: ${s16}, lớn: ${big}, max ${mx}), trùng chiều ${dup}`;
-}
-function ksShowDiag(t) {
-  let d = document.getElementById('ksDiag'); const bt = document.getElementById('btnSub');
-  if (!d && bt) { d = document.createElement('div'); d.id = 'ksDiag'; d.style.cssText = 'font-size:11px;line-height:1.35;margin-top:8px;opacity:.85;white-space:pre-wrap;word-break:break-word'; bt.insertAdjacentElement('afterend', d); }
-  if (d) d.textContent = t;
-}
-/* bỏ tam giác sợi chỉ chồng lên da: cạnh có hướng bị dùng 2 lần thì bỏ mặt nhỏ hơn (bản nhanh, bảng băm bằng mảng số) */
-function ksCleanDup(pos, idx0) {
-  const idx = idx0, nT = idx.length / 3, es = ksEdgeSet(idx.length), pr = [];
-  for (let t = 0; t < nT; t++) for (let k = 0; k < 3; k++) { const p = es.add(idx[t * 3 + k], idx[t * 3 + (k + 1) % 3], t); if (p >= 0 && p !== t) pr.push(p, t); }
-  if (!pr.length) return { idx, n: 0 };
-  const area = t => { const a = idx[t * 3] * 3, b = idx[t * 3 + 1] * 3, c = idx[t * 3 + 2] * 3; const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2], vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2]; const x = uy * vz - uz * vy, y = uz * vx - ux * vz, z = ux * vy - uy * vx; return x * x + y * y + z * z; };
-  const kill = new Uint8Array(nT); let nk = 0;
-  for (let i = 0; i < pr.length; i += 2) { const p = pr[i], t = pr[i + 1]; if (kill[p] || kill[t]) continue; const v = area(p) >= area(t) ? t : p; kill[v] = 1; nk++; }
-  const out = new Uint32Array((nT - nk) * 3); let o = 0;
-  for (let t = 0; t < nT; t++) if (!kill[t]) { out[o++] = idx[t * 3]; out[o++] = idx[t * 3 + 1]; out[o++] = idx[t * 3 + 2]; }
-  return { idx: out, n: nk };
-}
-/* bịt nhanh vài vòng hở nhỏ (<= maxOpen cạnh hở): chỉ xét cạnh hở, không quét lại cả model. Trả null nếu không bịt kín được */
-let ksCapWhy = '';
-function ksCapFew(pos, idx0, maxOpen) {
-  ksCapWhy = '';
-  const nI = idx0.length, he = ksEdgeSet(nI);
-  for (let i = 0; i < nI; i += 3) for (let k = 0; k < 3; k++) he.add(idx0[i + k], idx0[i + (k + 1) % 3], 0);
-  const bnd = [];
-  for (let i = 0; i < nI; i += 3) for (let k = 0; k < 3; k++) { const a = idx0[i + k], b = idx0[i + (k + 1) % 3]; if (!he.has(b, a)) { bnd.push([a, b]); if (bnd.length > maxOpen) { ksCapWhy = 'nhiều hơn ' + maxOpen + ' cạnh hở'; return null; } } }
-  if (!bnd.length) { ksCapWhy = 'không có cạnh hở'; return null; }
-  let _el = bnd.map(([a, b]) => Math.hypot(pos[a*3]-pos[b*3], pos[a*3+1]-pos[b*3+1], pos[a*3+2]-pos[b*3+2]).toPrecision(3)).join(','); ksCapWhy = 'cạnh hở dài ' + _el + ': ';
-  const nxt = new Map(); for (const [a, b] of bnd) { if (nxt.has(a)) { ksCapWhy += 'một đỉnh có 2 cạnh hở đi ra'; return null; } nxt.set(a, b); }
-  const seen = new Set(), loops = [];
-  for (const [a] of bnd) {
-    if (seen.has(a)) continue;
-    const loop = [a]; seen.add(a); let to = nxt.get(a), ok = false;
-    for (let s = 0; s <= bnd.length; s++) { if (to === undefined) break; if (to === a) { ok = true; break; } if (seen.has(to)) break; seen.add(to); loop.push(to); to = nxt.get(to); }
-    if (!ok || loop.length < 3) { ksCapWhy += 'chuỗi cạnh hở không khép kín'; return null; } loops.push(loop);
-  }
-  const nV = pos.length / 3, np = new Float32Array(pos.length + loops.length * 3), add = []; np.set(pos);
-  loops.forEach((v, li) => {
-    let cx = 0, cy = 0, cz = 0; for (const x of v) { cx += pos[x * 3]; cy += pos[x * 3 + 1]; cz += pos[x * 3 + 2]; }
-    const ci = nV + li; np[ci * 3] = cx / v.length; np[ci * 3 + 1] = cy / v.length; np[ci * 3 + 2] = cz / v.length;
-    for (let i = 0; i < v.length; i++) add.push(v[(i + 1) % v.length], v[i], ci);
-  });
-  const ni = new Uint32Array(nI + add.length); ni.set(idx0); ni.set(add, nI);
-  const h2 = ksEdgeSet(ni.length); for (let i = 0; i < ni.length; i += 3) for (let k = 0; k < 3; k++) h2.add(ni[i + k], ni[i + (k + 1) % 3], 0);
-  for (let i = 0; i < ni.length; i += 3) for (let k = 0; k < 3; k++) if (!h2.has(ni[i + (k + 1) % 3], ni[i + k])) { ksCapWhy += 'bịt xong vẫn còn hở'; return null; }
-  ksCapWhy = 'bịt được'; return { pos: np, idx: ni, loops: loops.length };
-}
-const ksYield = () => new Promise(r => setTimeout(r, 4));
-/* khoét chạy theo từng bước, giữa các bước nhường luồng cho trình duyệt để không hiện "Page Unresponsive"; trong lúc chạy chặn bấm lung tung */
-async function subtractPart(B, A, clr) {
-  const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:99999;cursor:progress;background:transparent'; document.body.appendChild(ov);
-  try { return await ksSubtractCore(B, A, clr); } finally { ov.remove(); }
-}
-async function ksSubtractCore(B, A, clr) {
+function subtractPart(B, A, clr) {
   if (!CSG) return { err: shTxt('Chưa nạp được thư viện cắt khối (three-bvh-csg). Thử tải lại trang.', 'The solid-cut library (three-bvh-csg) is not loaded. Try reloading the page.') };
-  const _t0 = performance.now(); let note = '', b = B, a = A;
+  let note = '', b = B, a = A;
   if (!isClosed(b)) { b = capHoles(b); note += shTxt('Thân B hở nên em đã đóng lỗ trước khi khoét. ', 'Body B was open, so I closed its holes before cutting. '); }
   if (!isClosed(a)) { a = capHoles(a); note += shTxt('Khớp A hở nên em đã đóng lỗ trước khi khoét. ', 'Joint A was open, so I closed its holes before cutting. '); }
   const ga = ksGrow(a, clr), { Brush, Evaluator } = CSG, mk = (pos, idx) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos.slice(), 3)); g.setIndex(new THREE.BufferAttribute(idx.slice(), 1)); return g; };
   const g1 = mk(b.pos, b.idx), g2 = mk(ga.pos, ga.idx), b1 = new Brush(g1), b2 = new Brush(g2); b1.updateMatrixWorld(); b2.updateMatrixWorld();
   const ev = new Evaluator(); try { ev.attributes = ['position']; } catch (e) {} ev.useGroups = false;
-  await ksYield();
-  const _m1 = performance.now();
-  const res = ev.evaluate(b1, b2, CSG.SUBTRACTION); const _c1 = performance.now(); await ksYield(); const _sp = soupFromGeometry(res.geometry); const _c2 = performance.now(); await ksYield(); const out0 = ksWeld(_sp); res.geometry.dispose(); g1.dispose(); g2.dispose();
-  const _m2 = performance.now(); await ksYield();
-  const out = ksDropDebris(out0); const _c3 = performance.now(); if (out.dropped) note += shTxt(`Em đã xóa ${out.dropped} mặt vụn rời sau khi khoét. `, `Removed ${out.dropped} loose debris faces after cutting. `);
-  let dg = ''; try { dg = `[1] weld bỏ ${ksWeldSkip} mặt suy biến; sau khoét+weld: ${ksDiag(out.idx)}\n`; } catch (e) { dg = 'diag lỗi ' + e.message + '\n'; }
-  let left = -1, _tCd = 0, _tPh = 0;
-  if (out.idx.length) {
-    let cdN = 0, phN = 0; const t0 = performance.now();
-    for (let r = 0; r < 6; r++) {
-      await ksYield();
-      const _q0 = performance.now(); const cd = ksCleanDup(out.pos, out.idx); _tCd += performance.now() - _q0; if (r > 0 && !cd.n) break;
-      out.idx = cd.idx; cdN += cd.n; await ksYield(); const _q1 = performance.now(); const ph = ksPatchHoles(out.pos, out.idx, 64, 0.08); _tPh += performance.now() - _q1; out.idx = ph.idx; phN += ph.n; left = ph.left;
-      if (performance.now() - t0 > 16000) break;
-    }
-    if (cdN || phN) note += shTxt(`Em đã dọn ${cdN} mặt mỏng chồng lên da và vá ${phN} lỗ li ti. `, `Removed ${cdN} thin overlapping faces and patched ${phN} tiny holes. `);
-    try { dg += `[1b] bỏ ${cdN} mặt chồng, vá ${phN} lỗ, còn hở ${left} cạnh\n`; } catch (e) {}
-  }
-  const _m3 = performance.now();
+  const res = ev.evaluate(b1, b2, CSG.SUBTRACTION), out = ksWeld(soupFromGeometry(res.geometry)); res.geometry.dispose(); g1.dispose(); g2.dispose();
   if (!out.idx.length) return { err: shTxt('Khoét xong không còn gì của thân B. Kiểm tra lại A và B.', 'Nothing of body B is left after cutting. Check A and B.') };
-  await ksYield(); let _tCap = 0, _capMsg = 'không chạy (left=' + left + ')';
-  if (left > 0 && left <= 16) { let cf = null; const _k0 = performance.now(); try { cf = ksCapFew(out.pos, out.idx, 16); } catch (e) { ksCapWhy = 'lỗi ' + e.message; } _tCap = performance.now() - _k0; _capMsg = ksCapWhy; try { if (cf) { out.pos = cf.pos; out.idx = cf.idx; left = 0; note += shTxt(`Em đã bịt nhanh ${cf.loops} lỗ hở nhỏ còn lại. `, `Quickly closed the ${cf.loops} remaining tiny holes. `); } } catch (e) {} }
   let np = mkPart(B.name, B.rgb, out.pos, out.idx, null); np.id = B.id; np.vis = B.vis;
-  if (left === 0) { np._cl = true; np._clI = np.idx; }
-  await ksYield(); const _n0 = performance.now(); let _tFx = 0, _tCh = 0, _isc = isClosed(np); const _tIs = performance.now() - _n0;
-  if (!_isc) {
-    let fx = null; const _f0 = performance.now(); try { fx = ksFixT(out.pos, out.idx); } catch (e) { console.error(e); } _tFx = performance.now() - _f0;
+  if (!isClosed(np)) {
+    let fx = null; try { fx = ksFixT(out.pos, out.idx); } catch (e) { console.error(e); }
     if (fx) { const q = mkPart(B.name, B.rgb, out.pos, fx, null); q.id = B.id; q.vis = B.vis; np = q; if (isClosed(np)) note += shTxt('Mép khoét có vài chỗ lệch nhỏ nên em đã nối lại. ', 'The cut edge had a few small mismatches, so I stitched them. '); }
-    if (!isClosed(np)) { await ksYield(); const _h0 = performance.now(); const cp = capHoles(np); _tCh = performance.now() - _h0; if (isClosed(cp)) { np = cp; note += shTxt('Mép khoét còn vài khe hở nhỏ nên em đã bịt lại. ', 'The cut edge had a few tiny gaps, so I closed them. '); } else note += shTxt('Kết quả khoét vẫn còn hở vài chỗ, nên kiểm tra lại trước khi cắt hoặc in. ', 'The cut result still has open spots, so check it before cutting or printing. '); }
+    if (!isClosed(np)) { const cp = capHoles(np); if (isClosed(cp)) { np = cp; note += shTxt('Mép khoét còn vài khe hở nhỏ nên em đã bịt lại. ', 'The cut edge had a few tiny gaps, so I closed them. '); } else note += shTxt('Kết quả khoét vẫn còn hở vài chỗ, nên kiểm tra lại trước khi cắt hoặc in. ', 'The cut result still has open spots, so check it before cutting or printing. '); }
   }
-  const _m4 = performance.now();
-  const _m5 = performance.now(), _s = (x, y) => Math.round((y - x) / 100) / 10;
-  try { dg += `[2] kết quả cuối: ${ksDiag(np.idx)}`; ksShowDiag(dg + `\nthời gian khoét: ${Math.round((performance.now() - _t0) / 1000)} giây (chuẩn bị ${_s(_t0, _m1)} | CSG+hàn ${_s(_m1, _m2)} | dọn+vá ${_s(_m2, _m3)} | nối+bịt ${_s(_m3, _m4)} | dọn cuối ${_s(_m4, _m5)})\nchi tiết: CSG ${_s(_m1, _c1)} | đổi sang mảng ${_s(_c1, _c2)} | hàn ${_s(_c2, _m2)} | xóa vụn ${_s(_m2, _c3)} | dọn mặt chồng ${Math.round(_tCd / 100) / 10} | vá lỗ ${Math.round(_tPh / 100) / 10}\nnối+bịt chi tiết: bịt nhanh ${Math.round(_tCap / 100) / 10} (${_capMsg}) | kiểm kín ${Math.round(_tIs / 100) / 10} | ksFixT ${Math.round(_tFx / 100) / 10} | capHoles ${Math.round(_tCh / 100) / 10}`); } catch (e) { ksShowDiag(dg + 'diag lỗi ' + e.message); }
   return { part: np, note };
 }
 function ksFillOpts(auto) {
@@ -5853,7 +5738,7 @@ $('#btnSub').onclick = () => {
   if (B.locked) return toast(shTxt('Thân B đang bị khóa. Bấm ổ khóa trong danh sách để mở khóa.', 'Body B is locked. Click the lock in the list to unlock it.'), true);
   busy(shTxt('Đang khoét khớp vào thân…', 'Cutting the joint into the body…'), async () => {
     if (!ksBoxHit(A, B)) { toast(shTxt('A và B không chạm nhau nên chưa có gì để khoét.', 'A and B do not touch, so there is nothing to cut.'), true); return; }
-    const hit = 1, r = await subtractPart(B, A, +$('#rSubClr').value / 100);
+    const hit = ksInside(A, B), r = subtractPart(B, A, +$('#rSubClr').value / 100);
     if (r.err) { toast(r.err, true); return; }
     histNote('Khoét khớp'); pushParts(); const i = S.parts.indexOf(B); S.parts[i] = r.part; S.partsSel = i;
     afterPartsChange(shTxt(`Đã khoét ${A.name} vào ${B.name}. `, `Cut ${A.name} into ${B.name}. `) + r.note + (hit ? '' : shTxt('Em không thấy A chui vào B nên có thể chưa đổi gì.', 'I did not see A going inside B, so nothing may have changed.')));
@@ -5881,7 +5766,7 @@ function ksAsk(p, hits) {
         const ans = await ksAsk(p, hits); if (ans === 'cancel') return;
         if (ans === 'sub') {
           const ok = await busy(shTxt('Đang khoét khớp vào thân…', 'Cutting the joint into the body…'), async () => {
-            let cur = p; for (const q of hits) { const r = await subtractPart(cur, q, +$('#rClr').value / 100); if (r.err) { toast(r.err, true); return false; } cur = r.part; }
+            let cur = p; for (const q of hits) { const r = subtractPart(cur, q, +$('#rClr').value / 100); if (r.err) { toast(r.err, true); return false; } cur = r.part; }
             histNote('Khoét khớp'); pushParts(); S.parts[S.partsSel] = cur; afterPartsChange(); return true;
           });
           if (!ok) return;
@@ -5957,6 +5842,13 @@ async function mgPnLoad(zip) {
 
 // Từ điển Việt → Anh (chạy lúc runtime)
 const I18N_DICT = {
+"Tải file thế nào?": "How to download?",
+"Từng mảnh nhỏ để in": "Separate small parts",
+"Mỗi bộ phận một file STL, xếp phẳng lên bàn in.": "Each part as its own STL file, laid flat on the print bed.",
+"Cả mô hình với các bộ phận đã tách": "Whole model with the split parts",
+"Một file, các bộ phận giữ đúng vị trí lắp ráp.": "One file, with parts kept in their assembled position.",
+"Cả hai": "Both",
+"Một file zip gồm cả hai kiểu trên.": "One zip file with both kinds above.",
 "Tạo lưỡi cắm từ viền hở": "Make tab from open rim",
 "Tạo lưỡi cắm": "Make tab",
 "Bấm Tạo lưỡi cắm": "Click Make tab",
@@ -6243,28 +6135,6 @@ const I18N_DICT = {
 "Rất cao": "Very high",
 "Rộng thân trên (mm)": "Upper housing width (mm)",
 "Sang Hoàn tất": "Go to Finish",
-"Sang Lưu file": "Go to Save file",
-"Lưu file": "Save file",
-"Làm tiếp": "Next up",
-"Không bắt buộc. Xuất xong Sếp muốn làm gì tiếp cũng được:": "Optional. After exporting, you can go anywhere from here:",
-"Lưu dự án (.zip)": "Save project (.zip)",
-"Làm Nam châm & Spin": "Make Magnets & Spin",
-"Tách khớp thêm": "Split more",
-"Làm Clicker": "Make a Clicker",
-"Mở lại chỉnh tiếp lần sau, giữ nguyên nhóm mặt và bộ phận": "Reopen later and keep face groups and parts as they are",
-"Giữ vị trí nam châm và chốt để chỉnh dung sai sau khi in thử": "Keep magnet and pin placement so you can tweak tolerances after a test print",
-"Giữ cài đặt switch để chỉnh khe hở sau khi in thử": "Keep switch settings so you can tweak clearances after a test print",
-"Ghép các mảnh bằng nam châm hoặc khớp xoay": "Join the parts with magnets or a spin joint",
-"Thêm nam châm giữ đầu và thân": "Add magnets to hold head and body",
-"Spin cần ít nhất 2 mảnh. Tách thêm rồi quay lại, mảnh nạp được sang Spin": "Spin needs at least 2 pieces. Split more, then come back; the parts can be loaded into Spin",
-"Tách phần thân thành nhiều mảnh để in": "Split the body into several printable pieces",
-"Cắt đầu và thân, khoét chỗ cho switch": "Cut head and body, with room for the switch",
-"App tự lật phẳng, đóng lỗ hở và xếp các mảnh lên bàn khi xuất. Zip có từng mảnh STL riêng và một file bàn in gộp, trục Z hướng lên.": "The app flattens, closes open holes and lays the pieces on the bed when exporting. The zip has each piece as its own STL plus one combined bed file, Z axis up.",
-"Mọi bộ phận đang ẩn. Hãy hiện ít nhất một bộ phận.": "All parts are hidden. Show at least one part.",
-"Đang xếp và nén các mảnh STL…": "Laying out and zipping the STL pieces…",
-"Cần ít nhất 2 bộ phận đang hiện để nạp.": "Need at least 2 visible parts to load.",
-"Tách xong là bấm Tải zip được ngay, không cần qua bước nào khác. App tự lật phẳng và xếp các mảnh lên bàn, trục Z hướng lên.": "As soon as you finish splitting you can click Download zip, no other step needed. The app flattens and lays the pieces on the bed, Z axis up.",
-"Muốn làm tiếp lần sau thì bấm Lưu dự án. Muốn làm nam châm, Spin hay Clicker thì chọn ở khung Làm tiếp bên dưới.": "To continue later, click Save project. For magnets, Spin or Clicker, use the Next up box below.",
 "Sang Xuất file": "Go to Export",
 "Sau": "Back",
 "Sau khi đặt, kéo mũi tên để dời, bấm vào mũi tên hoặc hình nam châm để mở bảng nhập số": "After placing, drag the arrows to move it, or click an arrow or the magnet icon to open the number panel",
@@ -6478,7 +6348,7 @@ const I18N_DICT = {
 "Theo %: gõ 150 là to gấp rưỡi, 50 là nhỏ một nửa so với hiện tại. Bấm Áp dụng kích thước để đổi": "By %: type 150 for one and a half times larger, 50 for half size. Click Apply size to change it",
 "Sau khi cắt, chọn Tất cả bộ phận để giữ khớp với nhau. Chọn một bộ phận thì chỉ mảnh đó đổi, có thể không còn vừa mảnh bên cạnh": "After cutting, choose All parts to keep the joints matching. Choosing one part changes only that piece, which may no longer fit its neighbor",
 "Xuất": "Export",
-"Bấm Tải zip. Trong zip có từng mảnh STL và một file bàn in gộp, trục Z hướng lên": "Click Download zip. The zip has each piece as an STL and one combined print-bed file, Z axis up",
+"Bấm Tải, em hỏi tải từng mảnh để in hay cả mô hình đã lắp ráp. Từng mảnh thì có zip, mỗi mảnh một file STL và một file bàn in gộp, trục Z hướng lên": "Click Download, I ask whether to download separate pieces to print or the whole assembled model. Separate pieces gives a zip with each piece as an STL and one combined print-bed file, Z axis up",
 "Muốn làm tiếp lần sau thì bấm Lưu dự án ở góc trên": "To continue next time, click Save project in the top corner",
 "Đã hiểu": "Got it",
 "Mướp sẽ không tự hiện nữa. Bấm vào Mướp hoặc nút mèo trên thanh trên khi cần": "Mướp won't pop up by itself anymore. Click Mướp or the Ask Mướp button when needed",
@@ -6949,7 +6819,6 @@ const UI = {
       $$('.btnFlag').forEach(b => b.classList.toggle('on', !langPop.hidden));
       UI.renderSetRaw();
       UI.fileMenu();
-      nxRender();
       if (typeof icSync === 'function') icSync();
     } catch (e) { console.error(e); }
   },
@@ -6959,24 +6828,6 @@ const UI = {
     fileMenu.querySelector('[data-f=export]').disabled = !ex || ex.disabled || (MODE === 'clicker' && !CK.res);
   }
 };
-/* ---------- Làm tiếp: gợi ý bước kế tiếp ở bước lưu file của từng thẻ (giả định workflow của user) ---------- */
-const NX_ITEMS = {
-  save: { t: 'Lưu dự án (.zip)', d: { joint: 'Mở lại chỉnh tiếp lần sau, giữ nguyên nhóm mặt và bộ phận', mspin: 'Giữ vị trí nam châm và chốt để chỉnh dung sai sau khi in thử', clicker: 'Giữ cài đặt switch để chỉnh khe hở sau khi in thử' }, go: () => $('#btnSave').click() },
-  mspin: { t: 'Làm Nam châm & Spin', d: { joint: 'Ghép các mảnh bằng nam châm hoặc khớp xoay', clicker: 'Thêm nam châm giữ đầu và thân' }, go: () => setMode('mspin') },
-  joint: { t: 'Tách khớp thêm', d: { mspin: 'Spin cần ít nhất 2 mảnh. Tách thêm rồi quay lại, mảnh nạp được sang Spin', clicker: 'Tách phần thân thành nhiều mảnh để in' }, go: () => setMode('joint') },
-  clicker: { t: 'Làm Clicker', d: { joint: 'Cắt đầu và thân, khoét chỗ cho switch', mspin: 'Cắt đầu và thân, khoét chỗ cho switch' }, go: () => setMode('clicker') },
-};
-const NX_PLAN = { joint: ['save', 'mspin', 'clicker'], mspin: ['save', 'joint', 'clicker'], clicker: ['save', 'mspin', 'joint'] };
-function nxRender() {
-  $$('.nxt').forEach(box => {
-    const ctx = box.dataset.nxt, key = ctx + '|' + SET.lang + '|' + (S.pos ? 1 : 0);
-    if (box.dataset.built === key) return; box.dataset.built = key; box.innerHTML = '';
-    const h = document.createElement('h3'); h.className = 'nxH'; h.textContent = 'Làm tiếp'; box.appendChild(h);
-    const sub = document.createElement('p'); sub.className = 'note nxS'; sub.textContent = 'Không bắt buộc. Xuất xong Sếp muốn làm gì tiếp cũng được:'; box.appendChild(sub);
-    NX_PLAN[ctx].forEach(k => { const it = NX_ITEMS[k], b = document.createElement('button'); b.className = 'btn'; b.disabled = !S.pos;
-      const t = document.createElement('span'); t.textContent = it.t; const d = document.createElement('small'); d.textContent = it.d[ctx]; b.append(t, d); b.onclick = it.go; box.appendChild(b); });
-  });
-}
 UI.renderSetRaw = renderSet;
 renderSet = function () { UI.renderSetRaw(); UI.emit(); };
 { const _a = setMode; setMode = function () { const r = _a.apply(this, arguments); UI.emit(); return r; }; }
@@ -6995,5 +6846,4 @@ UI.emit();
 
 
 </body></html>
-
 </body></html>

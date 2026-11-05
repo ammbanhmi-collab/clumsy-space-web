@@ -312,7 +312,7 @@ body[data-mode=magnet] #to2,body[data-mode=clicker] #to2{display:none!important}
 .mgItem.open .mgBody{display:flex}
 .mgListHd{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
 .mgItem span{flex:1;font-size:calc(12.5px*var(--fs,1))}
-body[data-mode=pin] #to2,body[data-mode=pin] #btnUndo,body[data-mode=pin] #btnRedo,body[data-mode=pin] #histCnt{display:none!important}
+body[data-mode=pin] #to2{display:none!important}
 #dimFrame{position:absolute;right:12px;top:178px;width:236px;background:var(--panel);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;z-index:6;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 #dimFrame h3{display:flex;justify-content:space-between;align-items:center}
 .dimSvg{width:100%;max-width:300px;height:auto;display:block;margin:0 auto;color:var(--ink)}
@@ -1424,7 +1424,7 @@ const S = {
   labels: null, groups: [], active: 0, size: 1, center: new THREE.Vector3(), name: '',
   viewGeo: null, pickGeo: null, viewMesh: null, pickMesh: null, colorAttr: null, stamp: null, stampN: 0,
   step: 1, preview: null, tool: 'orbit',
-  parts: [], partsSel: -1, partsFrom: '', hist: { seg: { u: [], r: [] }, parts: { u: [], r: [] }, model: { u: [], r: [] }, ck: { u: [], r: [] }, mg: { u: [], r: [] } },
+  parts: [], partsSel: -1, partsFrom: '', hist: { seg: { u: [], r: [] }, parts: { u: [], r: [] }, model: { u: [], r: [] }, ck: { u: [], r: [] }, mg: { u: [], r: [] }, pn: { u: [], r: [] } },
   placed: null, bed: null,
 };
 const modelGroup = new THREE.Group(); scene.add(modelGroup);
@@ -2187,7 +2187,7 @@ $('#hudMin').onclick = () => { const m = hud.classList.toggle('min'); $('#hudMin
    - Khi làm lại (kind 'r'): so theo .ut, thời điểm thao tác đó bị hoàn tác (để Redo trả đúng
      thứ tự ngược lại của các lần Ctrl+Z liên tiếp, dù chúng thuộc nhiều ngăn khác nhau). */
 function pickHist(kind) {
-  const buckets = [S.hist.model, S.hist.seg, S.hist.parts, S.hist.ck, S.hist.mg], field = kind === 'r' ? 'ut' : 't';
+  const buckets = [S.hist.model, S.hist.seg, S.hist.parts, S.hist.ck, S.hist.mg, S.hist.pn], field = kind === 'r' ? 'ut' : 't';
   let best = null, bestT = -1;
   for (const h of buckets) { const a = h[kind]; if (a.length) { const last = a[a.length - 1], t = last[field] ?? last.t; if (t > bestT) { bestT = t; best = h; } } }
   return best || S.hist.model;
@@ -2205,6 +2205,7 @@ function undo() {
   else if (h === S.hist.seg) { h.r.push(Object.assign(snapSeg(), { lb: e.lb, t: e.t, ut })); restoreSeg(e); }
   else if (h === S.hist.ck) { h.r.push(Object.assign(snapCK(), { lb: e.lb, t: e.t, ut })); restoreCK(e); }
   else if (h === S.hist.mg) { h.r.push(Object.assign(snapMG(), { lb: e.lb, t: e.t, ut })); restoreMG(e); }
+  else if (h === S.hist.pn) { h.r.push(Object.assign(snapPN(), { lb: e.lb, t: e.t, ut })); restorePN(e); }
   else { h.r.push(Object.assign(snapParts(), { lb: e.lb, t: e.t, ut })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
@@ -2215,6 +2216,7 @@ function redo() {
   else if (h === S.hist.seg) { h.u.push(Object.assign(snapSeg(), { lb: e.lb, t })); restoreSeg(e); }
   else if (h === S.hist.ck) { h.u.push(Object.assign(snapCK(), { lb: e.lb, t })); restoreCK(e); }
   else if (h === S.hist.mg) { h.u.push(Object.assign(snapMG(), { lb: e.lb, t })); restoreMG(e); }
+  else if (h === S.hist.pn) { h.u.push(Object.assign(snapPN(), { lb: e.lb, t })); restorePN(e); }
   else { h.u.push(Object.assign(snapParts(), { lb: e.lb, t })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
@@ -4209,7 +4211,7 @@ function pnList() {
   PN.pins.forEach((pin, i) => {
     const r = document.createElement('div'); r.className = 'mgItem' + (i === PN.sel ? ' on' : '');
     r.innerHTML = `<span>Chốt ${i + 1}: Ø${uVal(pin.d)} × ${uVal(pin.L)} ${UNIT}${pnHasHead(pin) ? ', đầu trục Ø' + uVal(pin.hd) : ''}</span><button class="btn sm" data-a="del" title="Xóa">${svgX}</button>`;
-    r.onclick = e => { if (e.target.closest('[data-a=del]')) { PN.pins.splice(i, 1); PN.sel = -1; $('#pnPop').hidden = true; } else { PN.sel = i; pnPopOpen(i); } pnInv(); pnRender(); pnList(); };
+    r.onclick = e => { if (e.target.closest('[data-a=del]')) { pushPN('Xóa chốt'); PN.pins.splice(i, 1); PN.sel = -1; $('#pnPop').hidden = true; } else { PN.sel = i; pnPopOpen(i); } pnInv(); pnRender(); pnList(); };
     l.appendChild(r);
   });
   $('#pnPinCount').textContent = PN.pins.length ? PN.pins.length + ' chốt' : 'Chưa có';
@@ -4238,13 +4240,40 @@ $('#pnXray').onchange = () => { PN.xray = $('#pnXray').checked; pnStyleMeshes();
 bind('#pnTolFix', '#vPnTolFix', v => (v / 100).toFixed(2)); bind('#pnTolRot', '#vPnTolRot', v => (v / 100).toFixed(2));
 $('#pnTolFix').addEventListener('input', pnInv); $('#pnTolRot').addEventListener('input', pnInv);
 
+/* ---------- lịch sử (Ctrl+Z) của Pin (Spin Xoay) ---------- */
+let PN_RESTORING = false;
+function snapPN() {
+  return { pins: PN.pins.map(pin => Object.assign({}, pin, { p: pin.p.clone(), n: pin.n.clone() })), sel: PN.sel, res: PN.res, ver: PN.ver, tolFix: $('#pnTolFix').value, tolRot: $('#pnTolRot').value };
+}
+function restorePN(s) {
+  PN.pins = s.pins.map(pin => Object.assign({}, pin, { p: pin.p.clone(), n: pin.n.clone() })); PN.sel = s.sel; PN.res = s.res; PN.ver = s.ver; PN.drag = null; PN.placing = false; $('#pnPop').hidden = true; $('#pnExport').disabled = !PN.res;
+  $('#pnTolFix').value = s.tolFix; $('#vPnTolFix').textContent = (+s.tolFix / 100).toFixed(2); $('#pnTolRot').value = s.tolRot; $('#vPnTolRot').textContent = (+s.tolRot / 100).toFixed(2);
+  if (MODE !== 'pin') return;
+  PN_RESTORING = true;
+  try {
+    if (PN.res && MSTEP < 3) modeGo(3);
+    else if (!PN.res && MSTEP >= 3) modeGo(2);
+    else if (MSTEP === 3) pinStep(3);
+    else { pnRender(); pnList(); }
+  } finally { PN_RESTORING = false; }
+}
+function pushPNSnap(snap, lb) { const h = S.hist.pn; h.u.push(Object.assign(snap, { lb: lb || histLabel(), t: Date.now() })); if (h.u.length > 30) h.u.shift(); h.r = []; refreshUndo(); }
+function pushPN(lb) { pushPNSnap(snapPN(), lb); }
+let pnDraft = null;
+function pnDraftStart() { if (!pnDraft) pnDraft = snapPN(); }
+function pnDraftCommit(lb) { if (pnDraft) { pushPNSnap(pnDraft, lb); pnDraft = null; } }
+$('#pnTolFix').addEventListener('focus', pnDraftStart); $('#pnTolFix').addEventListener('change', () => pnDraftCommit('Đổi dung sai khớp'));
+$('#pnTolRot').addEventListener('focus', pnDraftStart); $('#pnTolRot').addEventListener('change', () => pnDraftCommit('Đổi dung sai khớp'));
+$('#pnPop').addEventListener('focusin', e => { if (e.target.matches('input[data-k]')) pnDraftStart(); });
+$('#pnPop').addEventListener('change', e => { if (e.target.matches('input[data-k]')) pnDraftCommit('Đổi kích thước chốt'); });
+
 /* bấm lên mô hình để đặt chốt */
 let pnDown = null;
 cvs.addEventListener('pointerdown', ev => { pnDown = { x: ev.clientX, y: ev.clientY }; });
 cvs.addEventListener('pointerup', ev => {
   if (MODE !== 'pin' || MSTEP !== 2 || !PN.placing || ev.button !== 0 || !pnDown || Math.abs(ev.clientX - pnDown.x) + Math.abs(ev.clientY - pnDown.y) > 5) return;
   mgRay(ev); const s = pnSurface(ray.ray.origin.clone(), ray.ray.direction.clone()); if (!s) { if (pnBlocked) toast('Vùng mặt này chưa được chọn. Quay lại bước Chọn mặt để chọn thêm.', true); return; }
-  PN.pins.push(Object.assign({ id: PN.pseq++, p: s.p, n: s.n, off: 0 }, PN.def)); PN.sel = PN.pins.length - 1; pnStopPlacing(); pnInv(); pnRender(); pnList(); pnPopOpen(PN.sel); pnQuickWarn(PN.pins[PN.sel]);
+  pushPN('Đặt chốt'); PN.pins.push(Object.assign({ id: PN.pseq++, p: s.p, n: s.n, off: 0 }, PN.def)); PN.sel = PN.pins.length - 1; pnStopPlacing(); pnInv(); pnRender(); pnList(); pnPopOpen(PN.sel); pnQuickWarn(PN.pins[PN.sel]);
 });
 stage.addEventListener('pointerdown', ev => {
   if (MODE !== 'pin' || MSTEP !== 2 || ev.button > 0 || (ev.target.closest && ev.target.closest('.dkWin')) || PN.placing || !PN.pins.length) return;
@@ -4256,7 +4285,7 @@ stage.addEventListener('pointerdown', ev => {
 }, true);
 window.addEventListener('pointermove', ev => {
   const d = PN.drag; if (!d) return;
-  if (Math.abs(ev.clientX - d.x) + Math.abs(ev.clientY - d.y) > 4) d.moved = true; if (!d.moved) return;
+  if (Math.abs(ev.clientX - d.x) + Math.abs(ev.clientY - d.y) > 4) { if (!d.moved) pushPN('Kéo chốt'); d.moved = true; } if (!d.moved) return;
   const pin = PN.pins[d.i]; if (!pin) return; mgRay(ev);
   if (d.type === 'n') { const t = lineParam(d.p0, d.axis, ray.ray.origin, ray.ray.direction); if (t === null) return; pin.off = Math.max(-3, Math.min(30, Math.round((d.off0 - (t - d.t0)) * 10) / 10)); }
   else { const s = pnSurface(ray.ray.origin.clone(), ray.ray.direction.clone()); if (!s) return; pin.p.copy(s.p); pin.n.copy(s.n); }
@@ -4282,9 +4311,9 @@ function pnPopOpen(i, keep) {
   pop.onclick = e => {
     const a = e.target.closest('[data-a]'); if (!a) return;
     if (a.dataset.a === 'x') { pop.hidden = true; PN.sel = -1; }
-    if (a.dataset.a === 'del') { PN.pins.splice(i, 1); PN.sel = -1; pop.hidden = true; }
-    if (a.dataset.a === 'auto') { const far = pnSpan(pin); if (!far) toast('Không đo được bề dày ở chỗ này.', true); else { pin.L = Math.max(2, Math.floor((far - (pin.off || 0) - (pnHasHead(pin) ? pin.ht : 0) - 1) * 2) / 2); pnPopOpen(i); } }
-    if (a.dataset.a === 'dup') { const up = Math.abs(pin.n.y) < 0.9 ? V3(0, 1, 0) : V3(1, 0, 0), t = up.cross(pin.n).normalize(); PN.pins.push(Object.assign({}, pin, { id: PN.pseq++, p: pin.p.clone().addScaledVector(t, Math.max(pin.hd, pin.d) + 2), n: pin.n.clone() })); PN.sel = PN.pins.length - 1; pnPopOpen(PN.sel); }
+    if (a.dataset.a === 'del') { pushPN('Xóa chốt'); PN.pins.splice(i, 1); PN.sel = -1; pop.hidden = true; }
+    if (a.dataset.a === 'auto') { const far = pnSpan(pin); if (!far) toast('Không đo được bề dày ở chỗ này.', true); else { pushPN('Dài theo bề dày'); pin.L = Math.max(2, Math.floor((far - (pin.off || 0) - (pnHasHead(pin) ? pin.ht : 0) - 1) * 2) / 2); pnPopOpen(i); } }
+    if (a.dataset.a === 'dup') { pushPN('Nhân đôi chốt'); const up = Math.abs(pin.n.y) < 0.9 ? V3(0, 1, 0) : V3(1, 0, 0), t = up.cross(pin.n).normalize(); PN.pins.push(Object.assign({}, pin, { id: PN.pseq++, p: pin.p.clone().addScaledVector(t, Math.max(pin.hd, pin.d) + 2), n: pin.n.clone() })); PN.sel = PN.pins.length - 1; pnPopOpen(PN.sel); }
     pnInv(); pnRender(); pnList();
   };
   pop.oninput = e => { const k = e.target.dataset.k; if (!k) return; const v = parseFloat(e.target.value) / uF(); if (isNaN(v)) return; if (k === 'off' || v >= 0) pin[k] = v; pnInv(); pnRender(); pnList(); };
@@ -4346,7 +4375,7 @@ function pnBuild() {
       }
       pieces.push(out);
     }
-    const R = { ver: PN.ver, pieces, notes, an }; pnReport(R); PN.res = R; pnShowResult();
+    const R = { ver: PN.ver, pieces, notes, an }; pnReport(R); if (!PN_RESTORING) pushPN('Khoét lỗ chốt'); PN.res = R; pnShowResult();
   });
 }
 function pnShowResult() {

@@ -1424,7 +1424,7 @@ const S = {
   labels: null, groups: [], active: 0, size: 1, center: new THREE.Vector3(), name: '',
   viewGeo: null, pickGeo: null, viewMesh: null, pickMesh: null, colorAttr: null, stamp: null, stampN: 0,
   step: 1, preview: null, tool: 'orbit',
-  parts: [], partsSel: -1, partsFrom: '', hist: { seg: { u: [], r: [] }, parts: { u: [], r: [] }, model: { u: [], r: [] }, ck: { u: [], r: [] } },
+  parts: [], partsSel: -1, partsFrom: '', hist: { seg: { u: [], r: [] }, parts: { u: [], r: [] }, model: { u: [], r: [] }, ck: { u: [], r: [] }, mg: { u: [], r: [] } },
   placed: null, bed: null,
 };
 const modelGroup = new THREE.Group(); scene.add(modelGroup);
@@ -2187,7 +2187,7 @@ $('#hudMin').onclick = () => { const m = hud.classList.toggle('min'); $('#hudMin
    - Khi làm lại (kind 'r'): so theo .ut, thời điểm thao tác đó bị hoàn tác (để Redo trả đúng
      thứ tự ngược lại của các lần Ctrl+Z liên tiếp, dù chúng thuộc nhiều ngăn khác nhau). */
 function pickHist(kind) {
-  const buckets = [S.hist.model, S.hist.seg, S.hist.parts, S.hist.ck], field = kind === 'r' ? 'ut' : 't';
+  const buckets = [S.hist.model, S.hist.seg, S.hist.parts, S.hist.ck, S.hist.mg], field = kind === 'r' ? 'ut' : 't';
   let best = null, bestT = -1;
   for (const h of buckets) { const a = h[kind]; if (a.length) { const last = a[a.length - 1], t = last[field] ?? last.t; if (t > bestT) { bestT = t; best = h; } } }
   return best || S.hist.model;
@@ -2204,6 +2204,7 @@ function undo() {
   if (h === S.hist.model) { h.r.push(Object.assign(snapModel(), { lb: e.lb, t: e.t, ut })); restoreModel(e); }
   else if (h === S.hist.seg) { h.r.push(Object.assign(snapSeg(), { lb: e.lb, t: e.t, ut })); restoreSeg(e); }
   else if (h === S.hist.ck) { h.r.push(Object.assign(snapCK(), { lb: e.lb, t: e.t, ut })); restoreCK(e); }
+  else if (h === S.hist.mg) { h.r.push(Object.assign(snapMG(), { lb: e.lb, t: e.t, ut })); restoreMG(e); }
   else { h.r.push(Object.assign(snapParts(), { lb: e.lb, t: e.t, ut })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
@@ -2213,6 +2214,7 @@ function redo() {
   if (h === S.hist.model) { h.u.push(Object.assign(snapModel(), { lb: e.lb, t })); restoreModel(e); }
   else if (h === S.hist.seg) { h.u.push(Object.assign(snapSeg(), { lb: e.lb, t })); restoreSeg(e); }
   else if (h === S.hist.ck) { h.u.push(Object.assign(snapCK(), { lb: e.lb, t })); restoreCK(e); }
+  else if (h === S.hist.mg) { h.u.push(Object.assign(snapMG(), { lb: e.lb, t })); restoreMG(e); }
   else { h.u.push(Object.assign(snapParts(), { lb: e.lb, t })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
@@ -3464,9 +3466,9 @@ function mgList() {
     const r = e.target.closest('.mgItem'); if (!r) return; const i = +r.dataset.i, it = MG.items[i]; if (!it) return;
     MG.coll = MG.coll || new Set();
     const sh = e.target.closest('.mgpShape button'), a = e.target.closest('[data-a]');
-    if (sh) { it.shape = sh.dataset.s; for (const [k] of MG_FIELDS[it.shape]) if (!(it[k] > 0)) it[k] = MG.def[it.shape][k]; MG.sel = i; MG.res = null; mgRender(); mgList(); return; }
-    if (a && a.dataset.a === 'del') { MG.items.splice(i, 1); MG.sel = -1; MG.res = null; mgRender(); mgList(); return; }
-    if (a && a.dataset.a === 'dup') { const c = Object.assign({}, it, { id: MG.seq++, p: it.p.clone().add(V3(1, 0, 0).applyQuaternion(mgQuat(it)).multiplyScalar(mgSize(it)[0] + 2)), n: it.n.clone() }); MG.items.push(c); MG.sel = MG.items.length - 1; MG.res = null; mgRender(); mgList(); return; }
+    if (sh) { pushMG('Đổi hình nam châm'); it.shape = sh.dataset.s; for (const [k] of MG_FIELDS[it.shape]) if (!(it[k] > 0)) it[k] = MG.def[it.shape][k]; MG.sel = i; MG.res = null; mgRender(); mgList(); return; }
+    if (a && a.dataset.a === 'del') { pushMG('Xóa nam châm'); MG.items.splice(i, 1); MG.sel = -1; MG.res = null; mgRender(); mgList(); return; }
+    if (a && a.dataset.a === 'dup') { pushMG('Nhân đôi nam châm'); const c = Object.assign({}, it, { id: MG.seq++, p: it.p.clone().add(V3(1, 0, 0).applyQuaternion(mgQuat(it)).multiplyScalar(mgSize(it)[0] + 2)), n: it.n.clone() }); MG.items.push(c); MG.sel = MG.items.length - 1; MG.res = null; mgRender(); mgList(); return; }
     if (a && a.dataset.a === 'tg') { if (MG.sel === i) { if (MG.coll.has(it.id)) MG.coll.delete(it.id); else MG.coll.add(it.id); } else { MG.sel = i; MG.coll.delete(it.id); } mgRender(); mgList(); }
   });
   l.addEventListener('input', e => {
@@ -3474,6 +3476,8 @@ function mgList() {
     const v = parseFloat(e.target.value) / (e.target.dataset.len ? uF() : 1); if (isNaN(v)) return;
     if (k === 'off' || k === 'rot' || v > 0) it[k] = v; MG.res = null; mgRender(); mgList();
   });
+  l.addEventListener('focus', e => { if (e.target.matches('.mgItem input[data-k]')) mgDraftStart(); }, true);
+  l.addEventListener('change', e => { if (e.target.matches('.mgItem input[data-k]')) mgDraftCommit('Đổi kích thước nam châm'); });
 }
 
 /* ---------- giao diện bên trái ---------- */
@@ -3493,6 +3497,33 @@ function mgModeUI() {
 }
 bind('#mgTol', '#vMgTol', v => (v / 100).toFixed(2)); bind('#mgCover', '#vMgCover', v => (v / 10).toFixed(1));
 $('#mgTol').addEventListener('input', () => { mgRender(); MG.res = null; }); $('#mgCover').addEventListener('input', () => { mgRender(); MG.res = null; });
+
+/* ---------- lịch sử (Ctrl+Z) của Nam châm ---------- */
+let MG_RESTORING = false;
+function snapMG() {
+  return { items: MG.items.map(it => Object.assign({}, it, { p: it.p.clone(), n: it.n.clone() })), sel: MG.sel, shape: MG.shape, mode: MG.mode, res: MG.res, sig: MG.sig, srcRef: MG.srcRef, tol: $('#mgTol').value, cover: $('#mgCover').value };
+}
+function restoreMG(s) {
+  MG.items = s.items.map(it => Object.assign({}, it, { p: it.p.clone(), n: it.n.clone() })); MG.sel = s.sel; MG.shape = s.shape; MG.mode = s.mode; MG.res = s.res; MG.sig = s.sig; MG.srcRef = s.srcRef; MG.drag = null; MG.placing = false;
+  $('#mgTol').value = s.tol; $('#vMgTol').textContent = (+s.tol / 100).toFixed(2); $('#mgCover').value = s.cover; $('#vMgCover').textContent = (+s.cover / 10).toFixed(1);
+  $$('#mgShape button').forEach(x => x.classList.toggle('on', x.dataset.s === MG.shape)); mgNewDims();
+  $$('#mgMode button').forEach(x => x.classList.toggle('on', x.dataset.m === MG.mode)); mgModeUI();
+  if (MODE !== 'magnet') return;
+  MG_RESTORING = true;
+  try {
+    if (MG.res && MSTEP < 4) modeGo(4);
+    else if (!MG.res && MSTEP >= 4) modeGo(3);
+    else if (MSTEP === 4) magnetStep(4);
+    else { mgRender(); mgList(); }
+  } finally { MG_RESTORING = false; }
+}
+function pushMGSnap(snap, lb) { const h = S.hist.mg; h.u.push(Object.assign(snap, { lb: lb || histLabel(), t: Date.now() })); if (h.u.length > 30) h.u.shift(); h.r = []; refreshUndo(); }
+function pushMG(lb) { pushMGSnap(snapMG(), lb); }
+let mgDraft = null;
+function mgDraftStart() { if (!mgDraft) mgDraft = snapMG(); }
+function mgDraftCommit(lb) { if (mgDraft) { pushMGSnap(mgDraft, lb); mgDraft = null; } }
+$('#mgTol').addEventListener('focus', mgDraftStart); $('#mgTol').addEventListener('change', () => mgDraftCommit('Đổi dung sai hốc'));
+$('#mgCover').addEventListener('focus', mgDraftStart); $('#mgCover').addEventListener('change', () => mgDraftCommit('Đổi lớp phủ hốc'));
 $('#mgPlace').onclick = () => {
   MG.placing = !MG.placing; const b = $('#mgPlace'); b.classList.toggle('pri', !MG.placing);
   b.textContent = MG.placing ? 'Bấm lên mô hình… (bấm để hủy)' : 'Bấm lên mô hình để đặt'; stage.style.cursor = MG.placing ? 'crosshair' : '';
@@ -3624,7 +3655,7 @@ cvs.addEventListener('pointerup', ev => {
   if (MODE !== 'magnet' || MSTEP !== 3 || !MG.placing || ev.button !== 0 || !mgDown || Math.abs(ev.clientX - mgDown.x) + Math.abs(ev.clientY - mgDown.y) > 5) return;
   mgRay(ev); const s = mgSurface(ray.ray.origin.clone(), ray.ray.direction.clone(), Object.assign({ shape: MG.shape }, MG.def[MG.shape])); if (!s) { if (mgBlocked) toast('Vùng mặt này chưa được chọn. Quay lại bước Chọn mặt để chọn thêm.', true); return; }
   const it = Object.assign({ id: MG.seq++, shape: MG.shape, d: 0, w: 0, l: 0, h: 0, p: s.p, n: s.n, rot: 0, off: 0 }, MG.def[MG.shape]);
-  MG.items.push(it); MG.sel = MG.items.length - 1; MG.res = null; mgStopPlacing(); mgRender(); mgList(); mgPopOpen(MG.sel);
+  pushMG('Đặt nam châm'); MG.items.push(it); MG.sel = MG.items.length - 1; MG.res = null; mgStopPlacing(); mgRender(); mgList(); mgPopOpen(MG.sel);
 });
 /* kéo mũi tên, bấm mũi tên hoặc hình nam châm để mở bảng số */
 function lineParam(p0, a, rayO, rayD) {
@@ -3652,11 +3683,11 @@ stage.addEventListener('pointerdown', ev => {
   if (tag[0] === 'r') {
     const ax = (tag === 'rx' ? V3(1, 0, 0).applyQuaternion(q) : tag === 'rz' ? V3(0, 0, 1).applyQuaternion(q) : it.n.clone()).normalize();
     const u = (Math.abs(ax.y) < 0.9 ? V3(0, 1, 0) : V3(1, 0, 0)).cross(ax).normalize(), v = ax.clone().cross(u), c0 = mgOrg(it), a0 = mgRingAng(c0, ax, u, v) || 0;
-    MG.drag = { type: tag, ring: true, i: MG.sel, axis: ax, u, v, last: a0, acc: 0, p0: it.p.clone(), c0, dep: it.p.distanceTo(c0), n0: it.n.clone(), rot0: it.rot || 0, x: ev.clientX, y: ev.clientY, moved: false }; controls.enabled = false; return;
+    pushMG('Xoay nam châm'); MG.drag = { type: tag, ring: true, i: MG.sel, axis: ax, u, v, last: a0, acc: 0, p0: it.p.clone(), c0, dep: it.p.distanceTo(c0), n0: it.n.clone(), rot0: it.rot || 0, x: ev.clientX, y: ev.clientY, moved: false }; controls.enabled = false; return;
   }
   const axis = tag === 'x' ? V3(1, 0, 0).applyQuaternion(q) : tag === 'z' ? V3(0, 0, 1).applyQuaternion(q) : it.n.clone();
   const c0 = mgOrg(it), plane = tag !== 'n' && Math.abs(axis.dot(ray.ray.direction)) > 0.6 && Math.abs(it.n.dot(ray.ray.direction)) > 0.2, t0 = mgDragT({ plane, c0, axis }, it);
-  MG.drag = { type: tag, plane, i: MG.sel, axis, t0: t0 || 0, c0, p0: it.p.clone(), off0: it.off || 0, x: ev.clientX, y: ev.clientY, moved: false }; controls.enabled = false;
+  pushMG('Kéo nam châm'); MG.drag = { type: tag, plane, i: MG.sel, axis, t0: t0 || 0, c0, p0: it.p.clone(), off0: it.off || 0, x: ev.clientX, y: ev.clientY, moved: false }; controls.enabled = false;
 }, true);
 window.addEventListener('pointermove', ev => {
   const d = MG.drag; if (!d || d.type === 'tap') { if (d) d.moved = d.moved || Math.abs(ev.clientX - d.x) + Math.abs(ev.clientY - d.y) > 4; return; }
@@ -3697,6 +3728,7 @@ function mgPopOpen(i, keep) {
 /* ---------- gợi ý tối ưu cho FDM ---------- */
 $('#mgAdvise').onclick = () => {
   if (!MG.items.length) { toast('Hãy đặt ít nhất một nam châm trước.', true); return; }
+  pushMG('Áp dụng gợi ý');
   const small = MG.items.some(it => Math.min(...mgSize(it)) < 5), up = MG.items.filter(it => it.n.y > 0.7).length >= MG.items.length / 2;
   $('#mgTol').value = small ? 15 : 20; $('#vMgTol').textContent = (+$('#mgTol').value / 100).toFixed(2);
   $('#mgCover').value = 6; $('#vMgCover').textContent = '0.6';
@@ -3758,6 +3790,7 @@ function mgBuild() {
     const r = csgSubtractMany(src.pos, src.idx, cutters);
     if (!r.idx.length) { toast('Khoét không ra kết quả. Kiểm tra lại vị trí nam châm.', true); modeGo(3); return; }
     const part = mkPart(S.name + ' nam châm', [150, 200, 210], r.pos, r.idx, null), mm = mergeGeos(mags), magPart = mkPart('Nam châm mẫu', [230, 190, 60], mm.pos, mm.idx, null);
+    if (!MG_RESTORING) pushMG('Khoét hốc nam châm');
     MG.res = { part, magPart, note }; MG.sig = sig; MG.srcRef = S.pos;
     partsGroup.visible = true; modelGroup.visible = false; renderParts({ list: [part, magPart] });
     const b = new THREE.Box3().setFromObject(partsGroup); if (!b.isEmpty()) frameModel(b);
@@ -5394,9 +5427,9 @@ function pvUpdate() {
   /* kéo lên xuống trên dòng để chỉnh số */
   box.querySelectorAll('.pvRow').forEach(row => {
     const k = row.dataset.k;
-    row.addEventListener('dblclick', () => { const it = MG.items[MG.sel]; if (!it) return; it[k] = 0; MG.res = null; mgRender(); mgList(); });
+    row.addEventListener('dblclick', () => { const it = MG.items[MG.sel]; if (!it) return; pushMG('Chỉnh nam châm'); it[k] = 0; MG.res = null; mgRender(); mgList(); });
     row.addEventListener('pointerdown', e => {
-      const it = MG.items[MG.sel]; if (!it) return; const y0 = e.clientY, v0 = +(it[k] || 0); row.setPointerCapture(e.pointerId); e.preventDefault(); controls.enabled = false;
+      const it = MG.items[MG.sel]; if (!it) return; pushMG('Chỉnh nam châm'); const y0 = e.clientY, v0 = +(it[k] || 0); row.setPointerCapture(e.pointerId); e.preventDefault(); controls.enabled = false;
       const mv = ev => {
         const dy = (y0 - ev.clientY) / st.z; let v = k === 'off' ? Math.round((v0 + dy * 0.025) * 10) / 10 : Math.round(v0 + dy * 0.5);
         v = k === 'off' ? Math.max(-3, Math.min(30, v)) : Math.max(-360, Math.min(360, v)); it[k] = v; MG.res = null; mgRender(); mgList();

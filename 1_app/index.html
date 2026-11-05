@@ -1424,7 +1424,7 @@ const S = {
   labels: null, groups: [], active: 0, size: 1, center: new THREE.Vector3(), name: '',
   viewGeo: null, pickGeo: null, viewMesh: null, pickMesh: null, colorAttr: null, stamp: null, stampN: 0,
   step: 1, preview: null, tool: 'orbit',
-  parts: [], partsSel: -1, partsFrom: '', hist: { seg: { u: [], r: [] }, parts: { u: [], r: [] }, model: { u: [], r: [] } },
+  parts: [], partsSel: -1, partsFrom: '', hist: { seg: { u: [], r: [] }, parts: { u: [], r: [] }, model: { u: [], r: [] }, ck: { u: [], r: [] } },
   placed: null, bed: null,
 };
 const modelGroup = new THREE.Group(); scene.add(modelGroup);
@@ -2187,7 +2187,7 @@ $('#hudMin').onclick = () => { const m = hud.classList.toggle('min'); $('#hudMin
    - Khi làm lại (kind 'r'): so theo .ut, thời điểm thao tác đó bị hoàn tác (để Redo trả đúng
      thứ tự ngược lại của các lần Ctrl+Z liên tiếp, dù chúng thuộc nhiều ngăn khác nhau). */
 function pickHist(kind) {
-  const buckets = [S.hist.model, S.hist.seg, S.hist.parts], field = kind === 'r' ? 'ut' : 't';
+  const buckets = [S.hist.model, S.hist.seg, S.hist.parts, S.hist.ck], field = kind === 'r' ? 'ut' : 't';
   let best = null, bestT = -1;
   for (const h of buckets) { const a = h[kind]; if (a.length) { const last = a[a.length - 1], t = last[field] ?? last.t; if (t > bestT) { bestT = t; best = h; } } }
   return best || S.hist.model;
@@ -2203,6 +2203,7 @@ function undo() {
   const h = pickHist('u'); if (!h.u.length) return toast('Chưa có gì để hoàn tác.'); const e = h.u.pop(); const ut = Date.now();
   if (h === S.hist.model) { h.r.push(Object.assign(snapModel(), { lb: e.lb, t: e.t, ut })); restoreModel(e); }
   else if (h === S.hist.seg) { h.r.push(Object.assign(snapSeg(), { lb: e.lb, t: e.t, ut })); restoreSeg(e); }
+  else if (h === S.hist.ck) { h.r.push(Object.assign(snapCK(), { lb: e.lb, t: e.t, ut })); restoreCK(e); }
   else { h.r.push(Object.assign(snapParts(), { lb: e.lb, t: e.t, ut })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
@@ -2211,6 +2212,7 @@ function redo() {
   const h = pickHist('r'); if (!h.r.length) return; const e = h.r.pop(); const t = Date.now();
   if (h === S.hist.model) { h.u.push(Object.assign(snapModel(), { lb: e.lb, t })); restoreModel(e); }
   else if (h === S.hist.seg) { h.u.push(Object.assign(snapSeg(), { lb: e.lb, t })); restoreSeg(e); }
+  else if (h === S.hist.ck) { h.u.push(Object.assign(snapCK(), { lb: e.lb, t })); restoreCK(e); }
   else { h.u.push(Object.assign(snapParts(), { lb: e.lb, t })); S.placed = null; restoreParts(e); }
   refreshUndo();
 }
@@ -3794,6 +3796,22 @@ function ckModelChanged() {
 }
 function ckLeave() { ckHelp.visible = false; CK.picking = false; try { ckGizSync(); } catch (e) {} const b = $('#ckPick'); if (b) { b.classList.add('pri'); b.textContent = 'Bấm lên cổ mô hình để đặt'; } stage.style.cursor = ''; }
 
+/* ---------- lịch sử (Ctrl+Z) của Làm clicker ---------- */
+const CK_UNDO_IDS = ['ckH', 'ckX', 'ckZ', 'ckTravel', 'ckGapX', 'ckTolSlot', 'ckTolStem', 'ckTolHead', 'ckSw', 'swSlot', 'swHouse', 'swAbove', 'swStemTop', 'swCross', 'swArm', 'swEngage', 'swPocket'];
+function snapCK() { const vals = {}; for (const id of CK_UNDO_IDS) { const el = $('#' + id); if (el) vals[id] = el.value; } return { vals, res: CK.res }; }
+function restoreCK(s) {
+  for (const [id, v] of Object.entries(s.vals)) { const el = $('#' + id); if (el) { el.value = v; if (el.oninput) el.oninput(); } }
+  CK.res = s.res; CK.framed = false;
+  if (MODE !== 'clicker') return;
+  if (CK.res && MSTEP < 4) modeGo(4); else if (!CK.res && MSTEP >= 4) modeGo(3); else clickerStep(MSTEP);
+}
+function pushCKSnap(snap, lb) { const h = S.hist.ck; h.u.push(Object.assign(snap, { lb: lb || histLabel(), t: Date.now() })); if (h.u.length > 30) h.u.shift(); h.r = []; refreshUndo(); }
+function pushCK(lb) { pushCKSnap(snapCK(), lb); }
+let ckDraft = null;
+function ckDraftStart() { if (!ckDraft) ckDraft = snapCK(); }
+function ckDraftCommit() { if (ckDraft) { pushCKSnap(ckDraft, 'Đổi vị trí/loại switch'); ckDraft = null; } }
+CK_UNDO_IDS.forEach(id => { const el = $('#' + id); if (!el) return; el.addEventListener('focus', ckDraftStart); el.addEventListener('change', ckDraftCommit); });
+
 /* switch mẫu (Cherry MX), mặt tấm = y0; trả về {house, stem} là các BufferGeometry gộp */
 function swSample(cx, y0, cz, P) {
   const s = P.sw, G = [];
@@ -3893,6 +3911,7 @@ function ckBuild() {
     head = csgOp(head.pos, head.idx, box(s.arm + 2 * P.tStem, hl, s.cross + 2 * P.tStem), V(cx, hy, cz), CSG.SUBTRACTION);
     if (!head.idx.length || !body.idx.length) { toast('Khoét hốc làm hỏng mô hình. Thử chọn chỗ cổ rộng hơn.', true); modeGo(2); return; }
     const sw = swSample(cx, h, cz, P);
+    pushCK('Tạo đầu và thân');
     CK.res = { head: mkPart('Đầu', [226, 76, 56], head.pos, head.idx, null), body: mkPart('Thân', [160, 190, 30], body.pos, body.idx, null),
       swH: mkPart('Switch mẫu (vỏ)', [107, 122, 134], sw.house.pos, sw.house.idx, null), swS: mkPart('Switch mẫu (trục)', [226, 76, 56], sw.stem.pos, sw.stem.idx, null),
       h, g, cx, cz, y0, ceil, pb, P, note, W, cw };

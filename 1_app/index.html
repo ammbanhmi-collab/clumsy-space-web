@@ -1907,11 +1907,49 @@ function thickenPart(p, T) {
   for (const [a, b] of be) { idx[o++] = b; idx[o++] = a; idx[o++] = a + nV; idx[o++] = b; idx[o++] = a + nV; idx[o++] = b + nV; }
   const np = mkPart(p.name, p.rgb, pos, idx, p.hmap); np.id = p.id; np.vis = p.vis; np.thick = T; return np;
 }
-/* Đóng lỗ bằng quạt tam giác (chỉ để in/xuất) */
+/* Đóng một vòng hở bằng ear clipping trên mặt phẳng khớp nhất (Newell), mỗi bước chọn tai diện tích lớn nhất và bỏ tai gần suy biến (3 điểm thẳng hàng/trùng) - không tạo gai dài như quạt tam giác từ 1 đỉnh hay tâm. Trả null nếu đa giác tự cắt khi chiếu 2D (vòng không phẳng/quá méo) để nơi gọi dùng quạt cũ làm phương án an toàn. */
+function earClipLoop(pos, v) {
+  const n = v.length; if (n < 3) return null;
+  if (n === 3) return [v[2], v[1], v[0]];
+  const nrm = newell(pos, v); if (nrm.lengthSq() < 1e-20) return null; nrm.normalize();
+  const up = Math.abs(nrm.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+  const ux = new THREE.Vector3().crossVectors(up, nrm); if (ux.lengthSq() < 1e-20) return null; ux.normalize();
+  const uy = new THREE.Vector3().crossVectors(nrm, ux);
+  const rv = v.slice().reverse(), px = new Float64Array(n), py = new Float64Array(n);
+  for (let i = 0; i < n; i++) { const o = rv[i] * 3, dx = pos[o], dy = pos[o + 1], dz = pos[o + 2]; px[i] = dx * ux.x + dy * ux.y + dz * ux.z; py[i] = dx * uy.x + dy * uy.y + dz * uy.z; }
+  let area2 = 0; for (let i = 0; i < n; i++) { const j = (i + 1) % n; area2 += px[i] * py[j] - px[j] * py[i]; }
+  if (area2 < 0) { for (let i = 0; i < n; i++) py[i] = -py[i]; area2 = -area2; }
+  if (area2 < 1e-20) return null;
+  const cross = (a, b, c) => (px[b] - px[a]) * (py[c] - py[a]) - (py[b] - py[a]) * (px[c] - px[a]);
+  const inTri = (a, b, c, p) => { const d1 = cross(a, b, p), d2 = cross(b, c, p), d3 = cross(c, a, p); return d1 >= -1e-12 && d2 >= -1e-12 && d3 >= -1e-12; };
+  const minArea2 = area2 * 1e-8;
+  let ring = []; for (let i = 0; i < n; i++) ring.push(i);
+  const tris = []; let guard = 0;
+  while (ring.length > 3 && guard++ < n * n + 16) {
+    let best = -1, bestA = -1;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[(i - 1 + ring.length) % ring.length], b = ring[i], c = ring[(i + 1) % ring.length];
+      const a2 = cross(a, b, c); if (a2 <= 1e-15) continue;
+      let ok = true;
+      for (const p of ring) { if (p === a || p === b || p === c) continue; if (inTri(a, b, c, p)) { ok = false; break; } }
+      if (ok && a2 > bestA) { bestA = a2; best = i; }
+    }
+    if (best < 0) return null;
+    const i = best, a = ring[(i - 1 + ring.length) % ring.length], b = ring[i], c = ring[(i + 1) % ring.length];
+    if (bestA >= minArea2) tris.push(rv[a], rv[b], rv[c]);
+    ring.splice(i, 1);
+  }
+  const a = ring[0], b = ring[1], c = ring[2], a2 = cross(a, b, c);
+  if (a2 >= minArea2 || !tris.length) tris.push(rv[a], rv[b], rv[c]);
+  return tris;
+}
+/* Đóng lỗ bằng ear clipping (quạt tam giác cũ chỉ dùng khi vòng quá méo); chỉ để in/xuất */
 function capHoles(p) {
   const loops = boundaryLoops(p.idx).filter(l => l.closed && l.v.length >= 3); if (!loops.length) return p;
   const addP = [], addI = []; let nV = p.pos.length / 3;
   for (const { v } of loops) {
+    const tris = v.length <= 200 ? earClipLoop(p.pos, v) : null;
+    if (tris) { for (const x of tris) addI.push(x); continue; }
     const c = meanOf(p.pos, v), ci = nV + addP.length / 3; addP.push(c.x, c.y, c.z);
     for (let i = 0; i < v.length; i++) addI.push(v[(i + 1) % v.length], v[i], ci);
   }
@@ -5931,7 +5969,9 @@ function ksFixT(pos, idx0) {
   let idx = Array.from(idx0), mn = [1e30, 1e30, 1e30], mx = [-1e30, -1e30, -1e30];
   for (let i = 0; i < pos.length; i += 3) for (let k = 0; k < 3; k++) { const v = pos[i + k]; if (v < mn[k]) mn[k] = v; if (v > mx[k]) mx[k] = v; }
   const span = Math.max(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) || 1, tol2 = (span * 2e-4) * (span * 2e-4), key = (a, b) => a * 16777216 + b;
+  const _t0 = performance.now();
   for (let pass = 0; pass < 4; pass++) {
+    if (performance.now() - _t0 > 8000) break;
     const nT = idx.length / 3, he = new Set(), be = [];
     for (let i = 0; i < idx.length; i += 3) for (let k = 0; k < 3; k++) he.add(key(idx[i + k], idx[i + (k + 1) % 3]));
     for (let t = 0; t < nT; t++) for (let k = 0; k < 3; k++) { const a = idx[t * 3 + k], b = idx[t * 3 + (k + 1) % 3]; if (!he.has(key(b, a))) be.push([a, b, idx[t * 3 + (k + 2) % 3], t]); }
@@ -6006,20 +6046,22 @@ function ksPatchHoles(pos, idx0, maxEdges, extFrac) {
     for (const v of loop) for (let k = 0; k < 3; k++) { const x = pos[v * 3 + k]; if (x < lo[k]) lo[k] = x; if (x > hi[k]) hi[k] = x; }
     if (Math.max(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) > maxExt) continue;
     for (const e of es) used.add(e);
-    for (let k = 1; k < loop.length - 1; k++) add.push(loop[0], loop[k + 1], loop[k]);
+    const tris = earClipLoop(pos, loop);
+    if (tris) for (const x of tris) add.push(x);
+    else for (let k = 1; k < loop.length - 1; k++) add.push(loop[0], loop[k + 1], loop[k]);
     n++;
   }
   if (!n) return { idx: idx0, n: 0, left: total };
   const out = new Uint32Array(nI + add.length); out.set(idx0); out.set(add, nI);
   return { idx: out, n, left: total - used.size };
 }
-/* chẩn đoán kết quả khoét: đếm cạnh hở, cạnh trùng chiều, và các cụm cạnh hở theo cỡ */
+/* chẩn đoán kết quả khoét: đếm cạnh hở + cạnh trùng chiều (luôn chạy, rẻ) và cụm cạnh hở theo cỡ (chỉ khi window.KS_DIAG, tốn hơn vì phải gom cụm) */
 function ksDiag(idx) {
-  if (!window.KS_DIAG) return 'đã tắt để chạy nhanh';
-  const m = new Map(), key = (a, b) => a * 16777216 + b; let dup = 0;
+  const m = new Map(), key = (a, b) => a * 16777216 + b; let dup = 0, openN = 0;
   for (let i = 0; i < idx.length; i += 3) for (let k = 0; k < 3; k++) { const e = key(idx[i + k], idx[i + (k + 1) % 3]); m.set(e, (m.get(e) || 0) + 1); }
+  const be = []; for (const [e, c] of m) { if (c > 1) dup++; const a = Math.floor(e / 16777216), b = e % 16777216; if (!m.has(key(b, a))) { be.push([a, b]); openN++; } }
+  if (!window.KS_DIAG) return `hở ${openN} cạnh, trùng chiều ${dup} (đặt window.KS_DIAG=true để xem theo cụm)`;
   const par = new Map(), find = x => { let r = x; while (par.get(r) !== r) r = par.get(r); while (par.get(x) !== r) { const n = par.get(x); par.set(x, r); x = n; } return r; };
-  const be = []; for (const [e, c] of m) { if (c > 1) dup++; const a = Math.floor(e / 16777216), b = e % 16777216; if (!m.has(key(b, a))) be.push([a, b]); }
   for (const [a, b] of be) { if (!par.has(a)) par.set(a, a); if (!par.has(b)) par.set(b, b); const ra = find(a), rb = find(b); if (ra !== rb) par.set(ra, rb); }
   const cs = new Map(); for (const [a] of be) { const r = find(a); cs.set(r, (cs.get(r) || 0) + 1); }
   let s3 = 0, s16 = 0, big = 0, mx = 0; for (const n of cs.values()) { if (n <= 3) s3++; else if (n <= 16) s16++; else big++; if (n > mx) mx = n; }
@@ -6030,17 +6072,43 @@ function ksShowDiag(t) {
   if (!d && bt) { d = document.createElement('div'); d.id = 'ksDiag'; d.style.cssText = 'font-size:11px;line-height:1.35;margin-top:8px;opacity:.85;white-space:pre-wrap;word-break:break-word'; bt.insertAdjacentElement('afterend', d); }
   if (d) d.textContent = t;
 }
-/* bỏ tam giác sợi chỉ chồng lên da: cạnh có hướng bị dùng 2 lần thì bỏ mặt nhỏ hơn (bản nhanh, bảng băm bằng mảng số) */
+/* chỉnh hướng mặt (winding) nhất quán trong từng cụm liền nhau: 2 tam giác chung 1 cạnh (không tính biên) lẽ ra phải đi NGƯỢC chiều nhau trên cạnh đó; nếu đi CÙNG chiều thì lật tam giác kia lại (đổi 2 đỉnh) thay vì coi là "chồng" rồi xóa - cạnh chung cùng chiều chỉ có nghĩa là hướng sai, không có nghĩa là trùng hình học */
+function ksFixWinding(pos, idx0) {
+  const idx = Uint32Array.from(idx0), nT = idx.length / 3, ukey = (a, b) => a < b ? a * 16777216 + b : b * 16777216 + a;
+  const em = new Map();
+  for (let t = 0; t < nT; t++) for (let k = 0; k < 3; k++) { const key = ukey(idx[t * 3 + k], idx[t * 3 + (k + 1) % 3]); let l = em.get(key); if (!l) em.set(key, l = []); if (l.length < 2) l.push(t); }
+  const seen = new Uint8Array(nT), stack = []; let nf = 0;
+  const flip = t => { const o = t * 3, tmp = idx[o + 1]; idx[o + 1] = idx[o + 2]; idx[o + 2] = tmp; };
+  for (let s0 = 0; s0 < nT; s0++) {
+    if (seen[s0]) continue; seen[s0] = 1; stack.push(s0);
+    while (stack.length) {
+      const t = stack.pop();
+      for (let k = 0; k < 3; k++) {
+        const a = idx[t * 3 + k], b = idx[t * 3 + (k + 1) % 3], l = em.get(ukey(a, b));
+        if (!l || l.length !== 2) continue;
+        const t2 = l[0] === t ? l[1] : l[0]; if (seen[t2]) continue;
+        let k2 = -1; for (let q = 0; q < 3; q++) { const va = idx[t2 * 3 + q], vb = idx[t2 * 3 + (q + 1) % 3]; if ((va === a && vb === b) || (va === b && vb === a)) { k2 = q; break; } }
+        if (k2 < 0) continue;
+        if (idx[t2 * 3 + k2] === a) { flip(t2); nf++; }
+        seen[t2] = 1; stack.push(t2);
+      }
+    }
+  }
+  return { idx, n: nf };
+}
+/* bỏ tam giác trùng THẬT (cùng 3 đỉnh, chỉ khác chiều quay) sau khi đã chỉnh hướng nhất quán ở trên; cạnh chung cùng chiều mà 2 tam giác không cùng 3 đỉnh là hình học không-manifold khác (không phải trùng), giữ nguyên cả hai để không tạo lỗ mới */
 function ksCleanDup(pos, idx0) {
-  const idx = idx0, nT = idx.length / 3, es = ksEdgeSet(idx.length), pr = [];
+  const wf = ksFixWinding(pos, idx0), idx = wf.idx, nT = idx.length / 3, es = ksEdgeSet(idx.length), pr = [];
   for (let t = 0; t < nT; t++) for (let k = 0; k < 3; k++) { const p = es.add(idx[t * 3 + k], idx[t * 3 + (k + 1) % 3], t); if (p >= 0 && p !== t) pr.push(p, t); }
-  if (!pr.length) return { idx, n: 0 };
+  if (!pr.length) return { idx, n: 0, flipped: wf.n };
+  const sameTri = (p, t) => { const s0 = idx[p * 3], s1 = idx[p * 3 + 1], s2 = idx[p * 3 + 2], u0 = idx[t * 3], u1 = idx[t * 3 + 1], u2 = idx[t * 3 + 2]; return (s0 === u0 || s0 === u1 || s0 === u2) && (s1 === u0 || s1 === u1 || s1 === u2) && (s2 === u0 || s2 === u1 || s2 === u2); };
   const area = t => { const a = idx[t * 3] * 3, b = idx[t * 3 + 1] * 3, c = idx[t * 3 + 2] * 3; const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2], vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2]; const x = uy * vz - uz * vy, y = uz * vx - ux * vz, z = ux * vy - uy * vx; return x * x + y * y + z * z; };
   const kill = new Uint8Array(nT); let nk = 0;
-  for (let i = 0; i < pr.length; i += 2) { const p = pr[i], t = pr[i + 1]; if (kill[p] || kill[t]) continue; const v = area(p) >= area(t) ? t : p; kill[v] = 1; nk++; }
+  for (let i = 0; i < pr.length; i += 2) { const p = pr[i], t = pr[i + 1]; if (kill[p] || kill[t] || !sameTri(p, t)) continue; const v = area(p) >= area(t) ? t : p; kill[v] = 1; nk++; }
+  if (!nk) return { idx, n: 0, flipped: wf.n };
   const out = new Uint32Array((nT - nk) * 3); let o = 0;
   for (let t = 0; t < nT; t++) if (!kill[t]) { out[o++] = idx[t * 3]; out[o++] = idx[t * 3 + 1]; out[o++] = idx[t * 3 + 2]; }
-  return { idx: out, n: nk };
+  return { idx: out, n: nk, flipped: wf.n };
 }
 /* bịt nhanh vài vòng hở nhỏ (<= maxOpen cạnh hở): chỉ xét cạnh hở, không quét lại cả model. Trả null nếu không bịt kín được */
 let ksCapWhy = '';
@@ -6053,23 +6121,51 @@ function ksCapFew(pos, idx0, maxOpen) {
   if (!bnd.length) { ksCapWhy = 'không có cạnh hở'; return null; }
   let _el = bnd.map(([a, b]) => Math.hypot(pos[a*3]-pos[b*3], pos[a*3+1]-pos[b*3+1], pos[a*3+2]-pos[b*3+2]).toPrecision(3)).join(','); ksCapWhy = 'cạnh hở dài ' + _el + ': ';
   const nxt = new Map(); for (const [a, b] of bnd) { if (nxt.has(a)) { ksCapWhy += 'một đỉnh có 2 cạnh hở đi ra'; return null; } nxt.set(a, b); }
-  const seen = new Set(), loops = [];
+  const seen = new Set(), loops = [], openChains = [];
   for (const [a] of bnd) {
     if (seen.has(a)) continue;
     const loop = [a]; seen.add(a); let to = nxt.get(a), ok = false;
     for (let s = 0; s <= bnd.length; s++) { if (to === undefined) break; if (to === a) { ok = true; break; } if (seen.has(to)) break; seen.add(to); loop.push(to); to = nxt.get(to); }
-    if (!ok || loop.length < 3) { ksCapWhy += 'chuỗi cạnh hở không khép kín'; return null; } loops.push(loop);
+    if (ok && loop.length >= 3) loops.push(loop); else openChains.push(loop);
   }
-  const nV = pos.length / 3, np = new Float32Array(pos.length + loops.length * 3), add = []; np.set(pos);
-  loops.forEach((v, li) => {
+  if (openChains.length) {
+    /* Vài chuỗi cạnh hở không tự khép (thường do sai số hàn ở chỗ >2 cạnh gặp nhau): nối đầu hở của 1 chuỗi tới điểm bắt đầu gần nhất (của chính nó hoặc chuỗi khác) trong dung sai nhỏ, thay vì bỏ cuộc ngay */
+    let mn = [1e30, 1e30, 1e30], mx = [-1e30, -1e30, -1e30];
+    for (let i = 0; i < pos.length; i += 3) for (let k = 0; k < 3; k++) { const v = pos[i + k]; if (v < mn[k]) mn[k] = v; if (v > mx[k]) mx[k] = v; }
+    const span = Math.max(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) || 1, tol2 = (span * 5e-4) * (span * 5e-4);
+    const d2 = (u, w) => { const dx = pos[u * 3] - pos[w * 3], dy = pos[u * 3 + 1] - pos[w * 3 + 1], dz = pos[u * 3 + 2] - pos[w * 3 + 2]; return dx * dx + dy * dy + dz * dz; };
+    let bridged = 0, guard = 0;
+    while (openChains.length && guard++ < 64) {
+      let best = null, bestD = tol2;
+      for (let i = 0; i < openChains.length; i++) {
+        const end = openChains[i][openChains[i].length - 1];
+        for (let j = 0; j < openChains.length; j++) {
+          if (i === j && openChains[i].length < 3) continue;
+          const d = d2(end, openChains[j][0]); if (d <= bestD) { bestD = d; best = [i, j]; }
+        }
+      }
+      if (!best) break;
+      const [i, j] = best;
+      if (i === j) { loops.push(openChains[i]); openChains.splice(i, 1); }
+      else { const merged = openChains[i].concat(openChains[j]); openChains.splice(Math.max(i, j), 1); openChains.splice(Math.min(i, j), 1); openChains.push(merged); }
+      bridged++;
+    }
+    if (openChains.length) { ksCapWhy += 'chuỗi cạnh hở không khép kín'; return null; }
+    if (bridged) ksCapWhy += `(đã nối ${bridged} đầu hở trong dung sai) `;
+  }
+  const nV = pos.length / 3, add = [], addP = [];
+  for (const v of loops) {
+    const tris = earClipLoop(pos, v);
+    if (tris) { for (const x of tris) add.push(x); continue; }
     let cx = 0, cy = 0, cz = 0; for (const x of v) { cx += pos[x * 3]; cy += pos[x * 3 + 1]; cz += pos[x * 3 + 2]; }
-    const ci = nV + li; np[ci * 3] = cx / v.length; np[ci * 3 + 1] = cy / v.length; np[ci * 3 + 2] = cz / v.length;
+    const ci = nV + addP.length / 3; addP.push(cx / v.length, cy / v.length, cz / v.length);
     for (let i = 0; i < v.length; i++) add.push(v[(i + 1) % v.length], v[i], ci);
-  });
+  }
+  const np = new Float32Array(pos.length + addP.length); np.set(pos); np.set(addP, pos.length);
   const ni = new Uint32Array(nI + add.length); ni.set(idx0); ni.set(add, nI);
   const h2 = ksEdgeSet(ni.length); for (let i = 0; i < ni.length; i += 3) for (let k = 0; k < 3; k++) h2.add(ni[i + k], ni[i + (k + 1) % 3], 0);
   for (let i = 0; i < ni.length; i += 3) for (let k = 0; k < 3; k++) if (!h2.has(ni[i + (k + 1) % 3], ni[i + k])) { ksCapWhy += 'bịt xong vẫn còn hở'; return null; }
-  ksCapWhy = 'bịt được'; return { pos: np, idx: ni, loops: loops.length };
+  ksCapWhy += 'bịt được'; return { pos: np, idx: ni, loops: loops.length };
 }
 const ksYield = () => new Promise(r => setTimeout(r, 4));
 /* khoét chạy theo từng bước, giữa các bước nhường luồng cho trình duyệt để không hiện "Page Unresponsive"; trong lúc chạy chặn bấm lung tung */
@@ -6093,15 +6189,15 @@ async function ksSubtractCore(B, A, clr) {
   let dg = ''; try { dg = `[1] weld bỏ ${ksWeldSkip} mặt suy biến; sau khoét+weld: ${ksDiag(out.idx)}\n`; } catch (e) { dg = 'diag lỗi ' + e.message + '\n'; }
   let left = -1, _tCd = 0, _tPh = 0;
   if (out.idx.length) {
-    let cdN = 0, phN = 0; const t0 = performance.now();
+    let cdN = 0, phN = 0, flN = 0; const t0 = performance.now();
     for (let r = 0; r < 6; r++) {
       await ksYield();
-      const _q0 = performance.now(); const cd = ksCleanDup(out.pos, out.idx); _tCd += performance.now() - _q0; if (r > 0 && !cd.n) break;
+      const _q0 = performance.now(); const cd = ksCleanDup(out.pos, out.idx); _tCd += performance.now() - _q0; flN += cd.flipped || 0; if (r > 0 && !cd.n) break;
       out.idx = cd.idx; cdN += cd.n; await ksYield(); const _q1 = performance.now(); const ph = ksPatchHoles(out.pos, out.idx, 64, 0.08); _tPh += performance.now() - _q1; out.idx = ph.idx; phN += ph.n; left = ph.left;
       if (performance.now() - t0 > 16000) break;
     }
-    if (cdN || phN) note += shTxt(`Em đã dọn ${cdN} mặt mỏng chồng lên da và vá ${phN} lỗ li ti. `, `Removed ${cdN} thin overlapping faces and patched ${phN} tiny holes. `);
-    try { dg += `[1b] bỏ ${cdN} mặt chồng, vá ${phN} lỗ, còn hở ${left} cạnh\n`; } catch (e) {}
+    if (flN || cdN || phN) note += shTxt(`Em đã chỉnh hướng ${flN} mặt bị ngược, dọn ${cdN} mặt chồng thật và vá ${phN} lỗ li ti. `, `Fixed the winding of ${flN} flipped faces, removed ${cdN} true overlapping faces and patched ${phN} tiny holes. `);
+    try { dg += `[1b] chỉnh hướng ${flN} mặt, bỏ ${cdN} mặt chồng, vá ${phN} lỗ, còn hở ${left} cạnh\n`; } catch (e) {}
   }
   const _m3 = performance.now();
   if (!out.idx.length) return { err: shTxt('Khoét xong không còn gì của thân B. Kiểm tra lại A và B.', 'Nothing of body B is left after cutting. Check A and B.') };

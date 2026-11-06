@@ -859,6 +859,8 @@ header .hdr-act{margin-left:auto}
             <label class="fld"><span class="top">Nghiêng quanh trục 2 (độ)<span class="v" id="vCutA2">0 độ</span></span><input type="range" id="rCutA2" min="-90" max="90" step="1" value="0"></label>
             <p class="note">Chọn trục X, Y, Z hoặc canh theo chiều dài của bộ phận, rồi nghiêng thêm bằng hai thanh góc. Nghiêng 90 độ thì mặt cắt chạy dọc theo chiều dài.</p>
             <label class="fld"><span class="top">Vị trí mặt cắt<span class="v" id="vCutPos">50%</span></span><input type="range" id="rCutPos" min="2" max="98" value="50"></label>
+            <label class="fld"><span class="top">Khe ghép mặt cắt (mm)<span class="v" id="vMateGap">0.12</span></span><input type="range" id="rMateGap" min="0" max="30" value="12"></label>
+            <p class="note">Mặt tiếp giáp giữa hai mảnh chừa khe 0,1–0,15 mm để không bị chân voi.</p>
             <label class="chk"><input type="checkbox" id="cutPin" checked>Thêm chốt và lỗ cắm</label>
             <label class="fld"><span class="top">Cỡ chốt (% mặt cắt)<span class="v" id="vPin">28%</span></span><input type="range" id="rPin" min="10" max="45" value="28"></label>
             <label class="fld"><span class="top">Khe hở của khớp (mm)<span class="v" id="vClr">0.20</span></span><input type="range" id="rClr" min="0" max="80" value="20"></label>
@@ -1913,7 +1915,7 @@ function cylinderGeo(r, len, axis) {
   const g = new THREE.CylinderGeometry(r, r, len, 32, 1, false);
   if (axis === 0) g.rotateZ(Math.PI / 2); else if (axis === 2) g.rotateX(Math.PI / 2); return g;
 }
-function cutPart(p, { n, pos01, pin, pinPct, clr }) {
+function cutPart(p, { n, pos01, pin, pinPct, clr, mgap }) {
   if (!CSG) return { err: 'Chưa nạp được thư viện cắt khối (three-bvh-csg). Thử tải lại trang.' };
   let src = p, note = '';
   if (!isClosed(p)) { src = capHoles(p); note = 'Bộ phận hở nên em đã đóng lỗ trước khi cắt.'; }
@@ -1924,13 +1926,14 @@ function cutPart(p, { n, pos01, pin, pinPct, clr }) {
   const p0 = mn + pos01 * (mx - mn), ext = mx - mn;
   const ctr = new THREE.Vector3((bb.mn[0] + bb.mx[0]) / 2, (bb.mn[1] + bb.mx[1]) / 2, (bb.mn[2] + bb.mx[2]) / 2);
   const pt = ctr.clone().addScaledVector(n, p0 - ctr.dot(n)), q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
-  const at = pt.clone().addScaledVector(n, D / 2);
-  let A = csgOp(src.pos, src.idx, new THREE.BoxGeometry(D, D, D), at, CSG.SUBTRACTION, q, true);
-  let B = csgOp(src.pos, src.idx, new THREE.BoxGeometry(D, D, D), at, CSG.INTERSECTION, q, true);
+  const half = (mgap || 0) / 2;
+  const atA = pt.clone().addScaledVector(n, D / 2 - half), atB = pt.clone().addScaledVector(n, D / 2 + half);
+  let A = csgOp(src.pos, src.idx, new THREE.BoxGeometry(D, D, D), atA, CSG.SUBTRACTION, q, true);
+  let B = csgOp(src.pos, src.idx, new THREE.BoxGeometry(D, D, D), atB, CSG.INTERSECTION, q, true);
   if (!A.idx.length || !B.idx.length) return { err: 'Mặt cắt nằm ngoài bộ phận. Hãy dời vị trí cắt vào trong.' };
   if (pin) {
     const tol = 1e-4 * diag, pts = [];
-    for (let i = 0; i < A.pos.length; i += 3) { const x = A.pos[i], y = A.pos[i + 1], z = A.pos[i + 2]; if (Math.abs(x * n.x + y * n.y + z * n.z - p0) < tol) pts.push(x, y, z); }
+    for (let i = 0; i < A.pos.length; i += 3) { const x = A.pos[i], y = A.pos[i + 1], z = A.pos[i + 2]; if (Math.abs(x * n.x + y * n.y + z * n.z - (p0 - half)) < tol) pts.push(x, y, z); }
     const np = pts.length / 3;
     if (np > 2) {
       /* khung 2D trong mặt cắt, xoay theo trục chính của mặt cắt để chốt không lòi ra khi mặt cắt xiên */
@@ -1960,6 +1963,7 @@ function cutPart(p, { n, pos01, pin, pinPct, clr }) {
     const cp = capHoles(np); return isClosed(cp) ? cp : np;
   };
   const pa = heal(mkPart(p.name + ' A', p.rgb, A.pos, A.idx, null)), pb = heal(mkPart(p.name + ' B', groupRGB(S.parts.length + 3), B.pos, B.idx, null));
+  if (mgap > 0) note += shTxt(` Đã chừa khe ${mgap.toFixed(2)} mm ở mặt cắt.`, ` Left a ${mgap.toFixed(2)} mm gap at the cut.`);
   return { parts: [pa, pb], note };
 }
 
@@ -2007,7 +2011,7 @@ function renderParts(opts = {}) {
   if (useCache) for (const [id, e] of [...partGeoCache]) if (!S.parts.includes(e.p)) { partGeoDrop(e); partGeoCache.delete(id); }
   invalidate();
 }
-function snapParts() { return { parts: S.parts.slice(), sel: S.partsSel, from: S.partsFrom }; }
+function snapParts() { return { parts: S.parts.map(p => Object.assign({}, p)), sel: S.partsSel, from: S.partsFrom }; }
 function pushParts() { const h = S.hist.parts; h.u.push(Object.assign(snapParts(), { lb: histLabel(), t: Date.now() })); if (h.u.length > 30) h.u.shift(); h.r = []; refreshUndo(); }
 function restoreParts(s) { S.parts = s.parts.slice(); S.partsSel = s.sel; S.partsFrom = s.from; renderParts(); renderPartLists(); updateCutPlane(); }
 /* chọn bộ phận bằng cách bấm vào khung 3D */
@@ -2643,6 +2647,7 @@ $$('#toolSeg button').forEach(b => b.onclick = () => { $$('#toolSeg button').for
 $$('#axisSeg button').forEach(b => b.onclick = () => { $$('#axisSeg button').forEach(x => x.classList.toggle('on', x === b)); updateCutPlane(); });
 bind('#rLen', '#vLen', v => v + '%'); bind('#rFar', '#vFar', v => v + '%'); bind('#rThick', '#vThick', v => (v / 10).toFixed(1)); bind('#rPin', '#vPin', v => v + '%'); bind('#rClr', '#vClr', v => (v / 100).toFixed(2));
 $('#rCutPos').addEventListener('input', () => { $('#vCutPos').textContent = $('#rCutPos').value + '%'; updateCutPlane(); });
+bind('#rMateGap', '#vMateGap', v => (v / 100).toFixed(2));
 const needSel = () => { if (S.partsSel < 0 || !S.parts[S.partsSel]) { toast('Hãy chọn một bộ phận trong danh sách hoặc bấm vào nó trong khung 3D.', true); return null; } if (S.parts[S.partsSel].locked) { toast('Bộ phận đang bị khóa. Bấm ổ khóa trong danh sách để mở khóa.', true); return null; } return S.parts[S.partsSel]; };
 $('#extTarget').addEventListener('change', updateRimHi);
 $('#btnExt').onclick = () => { const p = needSel(); if (!p) return; const r = extrudeBorder(p, { target: $('#extTarget').value, lenPct: +$('#rLen').value, far: +$('#rFar').value / 100, flip: $('#extFlip').checked });
@@ -2650,7 +2655,7 @@ $('#btnExt').onclick = () => { const p = needSel(); if (!p) return; const r = ex
 $('#btnShell').onclick = () => { const p = needSel(); if (!p) return; pushParts(); S.parts[S.partsSel] = thickenPart(p, +$('#rThick').value / 10); afterPartsChange('Đã làm dày bộ phận.'); };
 $('#btnShellAll').onclick = () => busy('Đang làm dày…', async () => { pushParts(); S.parts = S.parts.map(p => p.locked ? p : thickenPart(p, +$('#rThick').value / 10)); afterPartsChange('Đã làm dày tất cả bộ phận (trừ bộ phận đang khóa).'); });
 $('#btnCut').onclick = () => { const p = needSel(); if (!p) return; busy('Đang cắt khối…', async () => {
-  const r = cutPart(p, { n: cutNormal(), pos01: +$('#rCutPos').value / 100, pin: $('#cutPin').checked, pinPct: +$('#rPin').value, clr: +$('#rClr').value / 100 });
+  const r = cutPart(p, { n: cutNormal(), pos01: +$('#rCutPos').value / 100, pin: $('#cutPin').checked, pinPct: +$('#rPin').value, clr: +$('#rClr').value / 100, mgap: +$('#rMateGap').value / 100 });
   if (r.err) { toast(r.err, true); return; } pushParts(); S.parts.splice(S.partsSel, 1, ...r.parts); S.partsSel = -1; afterPartsChange('Đã cắt thành 2 mảnh. ' + (r.note || ''));
 }); };
 $('#to4').onclick = () => goStep(4);
@@ -4732,7 +4737,7 @@ const ROACH_TIPS = [
   [/ít nhất một định dạng/, 'Tick STL hoặc OBJ (hoặc cả hai) trước khi tải.', 'Tick STL or OBJ (or both) before downloading.'],
   [/Không có viền|không có viền/, 'Chọn bộ phận còn viền hở (đường đỏ trên mô hình), hoặc đổi mục "Đùn phía giáp với".', 'Pick a part that still has an open rim (red line on the model), or change "Extrude toward".'],
 ];
-const ROACH_DEF = ['Bấm Hoàn tác (Cmd+Z hoặc Ctrl+Z) rồi làm lại bước vừa rồi. Nếu lỗi lặp lại, mở khung Nhật ký để xem chi tiết.', 'Press Undo (Cmd+Z or Ctrl+Z) and redo the last step. If it keeps happening, open the Log panel for details.'];
+const ROACH_DEF = ['Bấm Hoàn tác (Cmd+Z hoặc Ctrl+Z) rồi làm lại bước vừa rồi. Nếu lỗi lặp lại, chụp màn hình rồi báo cho Sếp biết.', 'Press Undo (Cmd+Z or Ctrl+Z) and redo the last step. If it keeps happening, take a screenshot and report it.'];
 function roachSay(msg) {
   try {
     const now = Date.now(); if (msg === roachLast && now - roachAt < 4000) return; roachLast = msg; roachAt = now;
@@ -6084,6 +6089,7 @@ async function mgPnLoad(zip) {
 
 // Từ điển Việt → Anh (chạy lúc runtime)
 const I18N_DICT = {
+"Khe ghép mặt cắt (mm)": "Mating gap at the cut (mm)",
 "Tạo lưỡi cắm từ viền hở": "Make tab from open rim",
 "Tạo lưỡi cắm": "Make tab",
 "Bấm Tạo lưỡi cắm": "Click Make tab",

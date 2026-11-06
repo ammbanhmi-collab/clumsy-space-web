@@ -700,6 +700,13 @@ header .hdr-act{margin-left:auto}
 .ksBox{background:var(--panel);color:var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:16px;max-width:400px;display:flex;flex-direction:column;gap:12px}
 .ksBox p{margin:0;line-height:1.5}
 .ksBox .ksBt{display:flex;gap:8px;flex-wrap:wrap}
+#svPop{position:fixed;z-index:90;width:min(340px,calc(100vw - 32px));max-height:min(60vh,420px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px}
+#svPop[hidden]{display:none}
+#svPop h3{display:flex;align-items:center;justify-content:space-between;font-size:calc(15px*var(--fs,1))}
+.svRow{display:flex;align-items:center;gap:8px}
+.svRow .svInfo{flex:1;min-width:0;display:flex;flex-direction:column}
+.svRow .svNm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svRow .svT{font-size:calc(11px*var(--fs,1));color:var(--ink2)}
 </style>
 
 <div id="home">
@@ -713,7 +720,7 @@ header .hdr-act{margin-left:auto}
   </div>
 </div>
 <div id="fileMenu" role="menu" aria-label="Tệp" hidden>
-  <button data-f="import" role="menuitem">Nhập file</button><button data-f="open" role="menuitem">Mở file</button><button data-f="save" role="menuitem">Lưu file</button><button data-f="export" role="menuitem">Xuất file</button>
+  <button data-f="import" role="menuitem">Nhập file</button><button data-f="open" role="menuitem">Mở file</button><button data-f="save" role="menuitem">Lưu file</button><button data-f="svlist" role="menuitem">Các bản đã lưu</button><button data-f="export" role="menuitem">Xuất file</button>
 </div>
 <div id="setPop" role="dialog" aria-label="Cài đặt" hidden>
   <div class="setHead"><b>Cài đặt</b><button class="ic" id="setClose" aria-label="Đóng"><svg class="px" viewBox="0 0 20 20" shape-rendering="crispEdges"><path d="M4 4h2v1h-2zM14 4h2v1h-2zM4 5h3v1h-3zM13 5h3v1h-3zM5 6h3v1h-3zM12 6h3v1h-3zM6 7h3v1h-3zM11 7h3v1h-3zM7 8h6v1h-6zM8 9h4v1h-4zM7 10h6v1h-6zM6 11h3v1h-3zM11 11h3v1h-3zM5 12h3v1h-3zM12 12h3v1h-3zM4 13h3v1h-3zM13 13h3v1h-3zM4 14h2v1h-2zM14 14h2v1h-2z"/></svg></button></div>
@@ -727,6 +734,11 @@ header .hdr-act{margin-left:auto}
 </div>
 <div id="langPop" role="menu" aria-label="Ngôn ngữ" hidden>
   <button data-lang="vi" role="menuitem"><span class="fl"></span>Tiếng Việt</button><button data-lang="en" role="menuitem"><span class="fl"></span>English</button>
+</div>
+<div id="svPop" role="dialog" aria-label="Các bản đã lưu" hidden>
+  <h3><b>Các bản đã lưu</b><button class="ic" id="svClose" aria-label="Đóng"><svg class="px" viewBox="0 0 20 20" shape-rendering="crispEdges"><path d="M4 4h2v1h-2zM14 4h2v1h-2zM4 5h3v1h-3zM13 5h3v1h-3zM5 6h3v1h-3zM12 6h3v1h-3zM6 7h3v1h-3zM11 7h3v1h-3zM7 8h6v1h-6zM8 9h4v1h-4zM7 10h6v1h-6zM6 11h3v1h-3zM11 11h3v1h-3zM5 12h3v1h-3zM12 12h3v1h-3zM4 13h3v1h-3zM13 13h3v1h-3zM4 14h2v1h-2zM14 14h2v1h-2z"/></svg></button></h3>
+  <p class="note" id="svEmpty">Chưa có bản lưu nào.</p>
+  <div class="list" id="svList"></div>
 </div>
 <div id="expPop" role="dialog" aria-label="Xuất file" hidden>
   <h3><b>Xuất file</b><button class="ic" id="expClose" aria-label="Đóng"><svg class="px" viewBox="0 0 20 20" shape-rendering="crispEdges"><path d="M4 4h2v1h-2zM14 4h2v1h-2zM4 5h3v1h-3zM13 5h3v1h-3zM5 6h3v1h-3zM12 6h3v1h-3zM6 7h3v1h-3zM11 7h3v1h-3zM7 8h6v1h-6zM8 9h4v1h-4zM7 10h6v1h-6zM6 11h3v1h-3zM11 11h3v1h-3zM5 12h3v1h-3zM12 12h3v1h-3zM4 13h3v1h-3zM13 13h3v1h-3zM4 14h2v1h-2zM14 14h2v1h-2z"/></svg></button></h3>
@@ -843,10 +855,14 @@ header .hdr-act{margin-left:auto}
             <div class="shAdv">
               <p class="note" id="shellInfo"></p>
               <div class="grid2"><button class="btn" id="btnShellSug">Gợi ý độ dày</button><button class="btn" id="btnShellPv">Xem mặt cắt</button></div>
+              <button class="btn" id="btnShThick">Xem độ dày (tô màu)</button>
               <div id="shPvCtl" class="hide">
                 <div class="seg" id="shAxis"><button data-a="0">X</button><button data-a="1" class="on">Y</button><button data-a="2">Z</button></div>
                 <label class="fld"><span class="top">Vị trí mặt cắt xem thử<span class="v" id="vShCut">50%</span></span><input type="range" id="rShCut" min="2" max="98" value="50"></label>
                 <p class="note">Màu cam là phần thịt của vỏ. Càng dày thì vòng cam càng rộng.</p>
+              </div>
+              <div id="shThickCtl" class="hide">
+                <p class="note">Đo độ dày thật bằng cách bắn tia từ mặt ngoài vào trong tới vỏ đối diện. Đỏ là mỏng (dưới 1,2 mm), xanh lá trong khoảng gợi ý (1,2-3 mm), xanh dương dày hơn 3 mm.</p>
               </div>
             </div>
             <div class="grid2"><button class="btn pri" id="btnShell">Dày bộ phận chọn</button><button class="btn" id="btnShellAll">Dày tất cả</button></div>
@@ -2191,7 +2207,10 @@ async function buildProjectBlob(fast) {
   zip.file('meta.json', JSON.stringify(meta));
   return await zip.generateAsync({ type: 'blob', compression: fast ? 'STORE' : 'DEFLATE' });
 }
-async function saveProject() { await saveFile('tach-khop-' + slug(S.name) + '.zip', await buildProjectBlob()); }
+async function saveProject() {
+  const blob = await buildProjectBlob(); await saveFile('tach-khop-' + slug(S.name) + '.zip', blob);
+  try { await svAdd({ name: S.name || '', t: Date.now(), step: S.step, mode: MODE, blob }); await svPrune(); } catch (e) { console.warn('svSnapshot', e); }
+}
 async function openProject(file) {
   const zip = await JSZip.loadAsync(file), meta = JSON.parse(await zip.file('meta.json').async('string'));
   const f32 = async n => new Float32Array(await zip.file(n).async('arraybuffer')), u32 = async n => new Uint32Array(await zip.file(n).async('arraybuffer'));
@@ -3330,7 +3349,7 @@ function setMode(m) {
   $('#brandTxt').textContent = { joint: 'Tách khớp', magnet: 'Cắt nam châm', clicker: 'Clicker', pin: 'Spin Xoay' }[m] || 'Clumsy Space';
   const alt = m === 'magnet' || m === 'clicker' || m === 'pin';
   $('#stepsX').hidden = !alt; $('nav.steps').hidden = alt;
-  mgLeave(); ckLeave(); pnLeave(); $('#mgPop').hidden = true; $('#expPop').hidden = true;
+  mgLeave(); ckLeave(); pnLeave(); $('#mgPop').hidden = true; $('#expPop').hidden = true; $('#svPop').hidden = true;
   if (m === 'joint') { if (S.pos) goStep(jointStep || 1); else $$('.step').forEach(s => s.classList.toggle('on', s.id === 's1')); }
   else if (alt) { buildStepsX(m); if (m === 'pin') PN.framed = false; modeGo((m === 'pin' ? PN.pieces.length : S.pos) ? MS[m] : 1); }
   else if (S.pos) { /* trang chủ: giữ nguyên cảnh phía sau */ }
@@ -5530,8 +5549,12 @@ const AS = { db: null, sig: '', hold: false, busy: false };
 function asDB() {
   return new Promise((res, rej) => {
     if (AS.db) return res(AS.db);
-    let rq; try { rq = indexedDB.open('clumsy_space', 1); } catch (e) { return rej(e); }
-    rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
+    let rq; try { rq = indexedDB.open('clumsy_space', 2); } catch (e) { return rej(e); }
+    rq.onupgradeneeded = () => {
+      const db = rq.result;
+      if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+      if (!db.objectStoreNames.contains('saves')) db.createObjectStore('saves', { keyPath: 'id', autoIncrement: true });
+    };
     rq.onsuccess = () => { AS.db = rq.result; res(AS.db); };
     rq.onerror = () => rej(rq.error);
   });
@@ -5578,8 +5601,67 @@ async function asRestore(rec) {
   document.body.appendChild(bar);
 })();
 
+
+/* ---------- Danh sách bản đã lưu (IndexedDB, chỉ ở máy này) ---------- */
+const svAdd = async rec => { const db = await asDB(); return new Promise((res, rej) => { const tx = db.transaction('saves', 'readwrite'); tx.objectStore('saves').add(rec); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
+const svAllRaw = async () => { const db = await asDB(); return new Promise((res, rej) => { const rq = db.transaction('saves').objectStore('saves').getAll(); rq.onsuccess = () => res(rq.result || []); rq.onerror = () => rej(rq.error); }); };
+const svDelOne = async id => { const db = await asDB(); return new Promise((res, rej) => { const tx = db.transaction('saves', 'readwrite'); tx.objectStore('saves').delete(id); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
+const SV_CAP = 30;
+async function svPrune() {
+  let all; try { all = await svAllRaw(); } catch (e) { return; }
+  if (all.length <= SV_CAP) return;
+  all.sort((a, b) => a.t - b.t);
+  for (const r of all.slice(0, all.length - SV_CAP)) { try { await svDelOne(r.id); } catch (e) { /* bỏ qua */ } }
+}
+let SV_AUTO_SIG = '';
+setInterval(() => {
+  if (!S.pos || S.preview) return; const sg = asSig(); if (sg === SV_AUTO_SIG) return; SV_AUTO_SIG = sg;
+  buildProjectBlob(true).then(blob => svAdd({ name: S.name || '', t: Date.now(), step: S.step, mode: MODE, blob, auto: true })).then(svPrune).catch(e => console.warn('svAuto', e));
+}, 300000);
+async function svRenderList() {
+  let recs = []; try { recs = await svAllRaw(); } catch (e) { }
+  recs.sort((a, b) => b.t - a.t);
+  const box = $('#svList'); box.innerHTML = '';
+  $('#svEmpty').classList.toggle('hide', !!recs.length);
+  for (const r of recs) {
+    const when = new Date(r.t), hh = when.toTimeString().slice(0, 5), same = when.toDateString() === new Date().toDateString();
+    const row = document.createElement('div'); row.className = 'lrow svRow'; row.dataset.id = r.id;
+    row.innerHTML = `<span class="svInfo"><span class="svNm">${pnEsc(r.name || shTxt('(chưa đặt tên)', '(untitled)'))}${r.auto ? ' · ' + shTxt('tự động', 'auto') : ''}</span><span class="svT">${same ? hh : when.toLocaleDateString() + ' ' + hh}</span></span><button class="btn sm" data-a="open">${shTxt('Mở', 'Open')}</button><button class="btn sm" data-a="del">${shTxt('Xóa', 'Delete')}</button>`;
+    box.appendChild(row);
+  }
+}
+const svPop = $('#svPop');
+function svOpen() {
+  svRenderList();
+  const r = $('#btnFile').getBoundingClientRect();
+  svPop.style.top = Math.min(r.bottom + 8, innerHeight - 40) + 'px'; svPop.style.right = Math.max(8, innerWidth - r.right) + 'px';
+  svPop.hidden = false;
+}
+function svClose() { svPop.hidden = true; }
+$('#svClose').onclick = svClose;
+document.addEventListener('pointerdown', e => { if (!svPop.hidden && !svPop.contains(e.target) && !e.target.closest('#btnFile')) svClose(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !svPop.hidden) svClose(); });
+svPop.addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const row = b.closest('.svRow'); const id = +row.dataset.id;
+  if (b.dataset.a === 'open') {
+    svClose();
+    busy(shTxt('Đang mở bản lưu…', 'Opening saved file…'), async () => {
+      let recs = []; try { recs = await svAllRaw(); } catch (e) { }
+      const rec = recs.find(x => x.id === id); if (!rec) { toast(shTxt('Không tìm thấy bản lưu.', 'Save not found.'), true); return; }
+      await openProject(rec.blob); statsUI(); setHud(); enableSteps(); $('#drop').hidden = true; S.lastFramed = 0; frameModel();
+      const m = ['magnet', 'pin', 'clicker'].includes(rec.mode) ? rec.mode : 'joint';
+      if (m === 'joint') { setMode('joint'); goStep(S.parts.length ? Math.min(Math.max(rec.step || 2, 2), 4) : 2); }
+      else { const max = MODE_DEF[m].ids.length - 1; MS[m] = Math.min(Math.max(rec.step || 1, 1), max); setMode(m); }
+      toast(shTxt('Đã mở bản lưu.', 'Opened saved file.'));
+    });
+  } else if (b.dataset.a === 'del') {
+    svDelOne(id).then(svRenderList).catch(() => toast(shTxt('Không xóa được.', 'Could not delete.'), true));
+  }
+});
+
 /* ---------- Làm dày vỏ: gợi ý độ dày, xem mặt cắt, bác Gián nhắc ---------- */
-const SH = { pv: null, axis: 1, cutPct: 50, key: '', tm: 0 };
+const SH = { pv: null, hm: null, axis: 1, cutPct: 50, key: '', tm: 0 };
 const shTxt = (vi, en) => SET.lang === 'en' ? en : vi;
 /* Đo bộ phận đang chọn (hoặc tất cả) rồi so với độ dày T (mm): ngưỡng in 1.2 mm (3 lớp vòi 0.4), trần theo kích thước */
 function shAssess(T) {
@@ -5678,7 +5760,76 @@ function shPvSync() {
   if (!cur || cur !== pv.src || !cur.vis || S.parts[S.partsSel] !== pv.src || S.step !== 3) { shPvOff(); return; }
   shPvHide(pv.pid, true);
 }
-$('#rThick').addEventListener('input', () => { clearTimeout(SH.tm); SH.tm = setTimeout(() => { shInfo(true); if (SH.pv) shPvDraw(); }, 160); });
+
+/* Tô màu độ dày thật: bắn tia từ mặt ngoài vào trong theo pháp tuyến (dùng BVH của three-mesh-bvh),
+   tới vỏ đối diện của khối đã-làm-dày (thickenPart); tô theo gradient đỏ (mỏng) -> xanh lá -> xanh dương (dày).
+   Mặt nhiều tam giác thì lấy mẫu cách đều (stride) để tránh bắn hàng trăm nghìn tia mỗi lần bấm. */
+function shHmColor(mt) {
+  const h = THREE.MathUtils.clamp(mt / 3, 0, 1) * 0.66;
+  return new THREE.Color().setHSL(h, 0.85, 0.5);
+}
+function shHmCompute(p, T) {
+  const nF = p.idx.length / 3, vn = vertexNormals(p.pos, p.idx);
+  const q = thickenPart(p, T), g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(q.pos, 3)); g.setIndex(new THREE.BufferAttribute(q.idx, 1));
+  if (g.computeBoundsTree) g.computeBoundsTree();
+  const mesh = new THREE.Mesh(g);
+  const bb = bboxOf(p.pos), diag = Math.max(1e-6, Math.hypot(...bb.size)), eps = diag * 1e-4;
+  const CAP = 20000, stride = Math.max(1, Math.round(nF / CAP));
+  const ray = new THREE.Raycaster(); ray.firstHitOnly = true; ray.near = eps * 2; ray.far = diag * 2;
+  const pos = new Float32Array(nF * 9), nor = new Float32Array(nF * 9), col = new Float32Array(nF * 9);
+  const o = new THREE.Vector3(), d = new THREE.Vector3();
+  let last = T;
+  for (let f = 0; f < nF; f++) {
+    const a = p.idx[f * 3], b = p.idx[f * 3 + 1], c = p.idx[f * 3 + 2];
+    if (f % stride === 0) {
+      const cx = (p.pos[a * 3] + p.pos[b * 3] + p.pos[c * 3]) / 3, cy = (p.pos[a * 3 + 1] + p.pos[b * 3 + 1] + p.pos[c * 3 + 1]) / 3, cz = (p.pos[a * 3 + 2] + p.pos[b * 3 + 2] + p.pos[c * 3 + 2]) / 3;
+      let nx = vn[a * 3] + vn[b * 3] + vn[c * 3], ny = vn[a * 3 + 1] + vn[b * 3 + 1] + vn[c * 3 + 1], nz = vn[a * 3 + 2] + vn[b * 3 + 2] + vn[c * 3 + 2];
+      const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
+      o.set(cx + nx * eps, cy + ny * eps, cz + nz * eps); d.set(-nx, -ny, -nz);
+      ray.set(o, d);
+      let hit = null; try { hit = ray.intersectObject(mesh, false)[0]; } catch (e) { }
+      last = hit ? Math.max(0, hit.distance) : T;
+    }
+    const cc = shHmColor(last), verts = [a, b, c];
+    for (let k = 0; k < 3; k++) {
+      const vi = verts[k], o9 = (f * 3 + k) * 3;
+      pos[o9] = p.pos[vi * 3]; pos[o9 + 1] = p.pos[vi * 3 + 1]; pos[o9 + 2] = p.pos[vi * 3 + 2];
+      nor[o9] = vn[vi * 3]; nor[o9 + 1] = vn[vi * 3 + 1]; nor[o9 + 2] = vn[vi * 3 + 2];
+      col[o9] = cc.r; col[o9 + 1] = cc.g; col[o9 + 2] = cc.b;
+    }
+  }
+  g.disposeBoundsTree && g.disposeBoundsTree(); g.dispose();
+  return { pos, nor, col };
+}
+function shHmFree() {
+  const hm = SH.hm; if (!hm || !hm.mesh) return;
+  helperGroup.remove(hm.mesh); hm.mesh.material.dispose(); hm.geo.dispose(); hm.mesh = null; hm.geo = null;
+}
+function shHmDraw() {
+  const hm = SH.hm; if (!hm) return;
+  shHmFree();
+  const r = shHmCompute(hm.src, +$('#rThick').value / 10), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(r.pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(r.nor, 3)); geo.setAttribute('color', new THREE.BufferAttribute(r.col, 3));
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0.02, side: THREE.DoubleSide }));
+  helperGroup.add(mesh); hm.mesh = mesh; hm.geo = geo;
+  shPvHide(hm.pid, true); invalidate();
+}
+function shHmUi(on) {
+  const b = $('#btnShThick'); if (b) b.textContent = on ? shTxt('Tắt xem độ dày', 'Hide thickness map') : shTxt('Xem độ dày (tô màu)', 'View thickness map');
+  const c = $('#shThickCtl'); if (c) c.classList.toggle('hide', !on);
+}
+function shHmOff() {
+  const hm = SH.hm; if (!hm) return;
+  shHmFree(); SH.hm = null; shPvHide(hm.pid, false); shHmUi(false); invalidate();
+}
+function shHmSync() {
+  const hm = SH.hm; if (!hm) return;
+  const cur = S.parts.find(x => x.id === hm.pid);
+  if (!cur || cur !== hm.src || !cur.vis || S.parts[S.partsSel] !== hm.src || S.step !== 3) { shHmOff(); return; }
+  shPvHide(hm.pid, true);
+}
+$('#rThick').addEventListener('input', () => { clearTimeout(SH.tm); SH.tm = setTimeout(() => { shInfo(true); if (SH.pv) shPvDraw(); if (SH.hm) shHmDraw(); }, 160); });
 $('#btnShellSug').onclick = () => {
   const a = shAssess(+$('#rThick').value / 10);
   if (!a) { toast('Chưa có bộ phận nào để đo.', true); return; }
@@ -5690,14 +5841,24 @@ $('#btnShellPv').onclick = () => {
   if (SH.pv) { shPvOff(); return; }
   const p = S.parts[S.partsSel];
   if (!p) { toast('Hãy chọn một bộ phận trong danh sách hoặc bấm vào nó trong khung 3D.', true); return; }
+  if (SH.hm) shHmOff();
   SH.pv = { pid: p.id, src: p, group: null, geo: null, pl: new THREE.Plane() };
   renderer.localClippingEnabled = true; shPvPlane(); shPvDraw(); shPvUi(true);
 };
+$('#btnShThick').onclick = () => {
+  if (SH.hm) { shHmOff(); return; }
+  const p = S.parts[S.partsSel];
+  if (!p) { toast('Hãy chọn một bộ phận trong danh sách hoặc bấm vào nó trong khung 3D.', true); return; }
+  if (SH.pv) shPvOff();
+  SH.hm = { pid: p.id, src: p, mesh: null, geo: null };
+  shHmUi(true);
+  busy(shTxt('Đang đo độ dày…', 'Measuring thickness…'), async () => shHmDraw());
+};
 $$('#shAxis button').forEach(b => b.onclick = () => { SH.axis = +b.dataset.a; $$('#shAxis button').forEach(x => x.classList.toggle('on', x === b)); shPvPlane(); });
 $('#rShCut').addEventListener('input', () => { SH.cutPct = +$('#rShCut').value; $('#vShCut').textContent = SH.cutPct + '%'; shPvPlane(); });
-$$('#toolSeg button').forEach(b => b.addEventListener('click', () => { if (b.dataset.t !== 'shell') shPvOff(); else shInfo(false); }));
-{ const _rp = renderParts; renderParts = function () { const r = _rp.apply(this, arguments); try { shPvSync(); if (S.step === 3 && !$('#t_shell').classList.contains('hide')) shInfo(false); } catch (e) { console.error(e); } return r; }; }
-{ const _gs = goStep; goStep = function (n) { if (n !== 3) { try { shPvOff(); } catch (e) {} } return _gs.apply(this, arguments); }; }
+$$('#toolSeg button').forEach(b => b.addEventListener('click', () => { if (b.dataset.t !== 'shell') { shPvOff(); shHmOff(); } else shInfo(false); }));
+{ const _rp = renderParts; renderParts = function () { const r = _rp.apply(this, arguments); try { shPvSync(); shHmSync(); if (S.step === 3 && !$('#t_shell').classList.contains('hide')) shInfo(false); } catch (e) { console.error(e); } return r; }; }
+{ const _gs = goStep; goStep = function (n) { if (n !== 3) { try { shPvOff(); shHmOff(); } catch (e) {} } return _gs.apply(this, arguments); }; }
 
 /* ---------- Khoét khớp (đợt 2): lấy B trừ A kèm khe hở ---------- */
 function ksRC(p) {
@@ -6108,6 +6269,11 @@ const I18N_DICT = {
 "Bấm Trừ A khỏi B. A giữ nguyên, B có hốc đúng hình A.": "Press Subtract A from B. A stays unchanged and B gets a pocket in the shape of A.",
 "Gợi ý độ dày": "Suggest thickness",
 "Xem mặt cắt": "View section",
+"Xem độ dày (tô màu)": "View thickness map",
+"Tắt xem độ dày": "Hide thickness map",
+"Đang đo độ dày…": "Measuring thickness…",
+"Đo độ dày thật bằng cách bắn tia từ mặt ngoài vào trong tới vỏ đối diện. Đỏ là mỏng (dưới 1,2 mm), xanh lá trong khoảng gợi ý (1,2-3 mm), xanh dương dày hơn 3 mm.": "Measures real thickness by casting a ray from the outer surface inward to the facing wall. Red is thin (under 1.2 mm), green is within the suggested range (1.2-3 mm), blue is thicker than 3 mm.",
+
 "Tắt xem mặt cắt": "Hide section view",
 "Vị trí mặt cắt xem thử": "Preview section position",
 "Màu cam là phần thịt của vỏ. Càng dày thì vòng cam càng rộng.": "Orange is the wall material. The thicker the wall, the wider the orange ring.",
@@ -6355,6 +6521,10 @@ const I18N_DICT = {
 "Làm lại (Ctrl+Y)": "Redo (Ctrl+Y)",
 "Làm lại từ nhóm": "Redo from groups",
 "Lưu dự án": "Save project",
+"Các bản đã lưu": "Saved files",
+"Chưa có bản lưu nào.": "No saves yet.",
+"(chưa đặt tên)": "(untitled)",
+
 "Lưu góc": "Save view",
 "Lưới nền": "Grid",
 "Lỗ trục chữ thập (mm mỗi cạnh)": "Cross stem hole (mm per side)",
@@ -7069,6 +7239,7 @@ fileMenu.addEventListener('click', e => {
   if (f === 'import') $(MODE === 'pin' ? '#pnFile' : '#fileModel').click();
   else if (f === 'open') $('#fileProj').click();
   else if (f === 'save') $('#btnSave').click();
+  else if (f === 'svlist') svOpen();
   else if (f === 'export') { const ex = expBtn(); if (ex && !ex.disabled) ex.click(); }
 });
 document.addEventListener('pointerdown', e => { if (!fileMenu.hidden && !fileMenu.contains(e.target) && !e.target.closest('#btnFile')) fileMenu.hidden = true; });
@@ -7123,7 +7294,7 @@ renderSet = function () { UI.renderSetRaw(); UI.emit(); };
 { const _a = enableSteps; enableSteps = function () { const r = _a.apply(this, arguments); UI.emit(); return r; }; }
 {
   const mo = new MutationObserver(() => UI.emit());
-  [fileMenu, setPop, langPop, expPop].forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['hidden'] }));
+  [fileMenu, setPop, langPop, expPop, svPop].forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['hidden'] }));
   ['#btnSave', '#btnExport', '#mgExport', '#ckExport', '#pnExport'].forEach(q => { const el = $(q); if (el) mo.observe(el, { attributes: true, attributeFilter: ['disabled'] }); });
 }
 UI.emit();
